@@ -9,9 +9,7 @@ import { RouterLink } from 'vue-router';
       <img src="/Logo.png" alt="Logo" class="logo" />
     </div>
     <nav class="nav-buttons">
-      <RouterLink to="/statistiche" class="nav-btn">Statistiche</RouterLink>
-      <RouterLink to="/classifica" class="nav-btn">Classifica</RouterLink>
-      <RouterLink to="/eroi" class="nav-btn">Eroi</RouterLink>
+      <RouterLink to="/sendprompt" class="nav-btn">Send Prompt</RouterLink>
       <RouterLink to="/login" class="nav-btn">Login</RouterLink>
     </nav>
   </header>

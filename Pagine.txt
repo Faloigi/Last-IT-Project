@@ -1,0 +1,5 @@
+Home
+Login/Registrazione
+Statistiche (Player/Clan/Eroi)
+Eroi
+Player

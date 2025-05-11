@@ -13,6 +13,11 @@ const router = createRouter({
       name: 'login',
       component: () => import('../views/LoginView.vue'),
     },
+    {
+      path: '/sendprompt',
+      name: 'sendprompt',
+      component: () => import('../views/PromptView.vue'),
+    },
   ],
 })
 
