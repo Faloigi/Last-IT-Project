@@ -6,7 +6,9 @@ import { RouterLink } from 'vue-router';
   <header class="main-header">
     <div class="logo-container">
       <!-- Sostituisci src con il percorso reale del logo se disponibile -->
-      <img src="/Logo.png" alt="Logo" class="logo" />
+      <RouterLink to="/">
+        <img src="/Logo.png" alt="Logo" class="logo" />
+      </RouterLink>
     </div>
     <nav class="nav-buttons">
       <RouterLink to="/sendprompt" class="nav-btn">Send Prompt</RouterLink>
@@ -36,7 +38,9 @@ import { RouterLink } from 'vue-router';
 }
 .logo {
   height: 48px;
-  width: auto;
+  width: 48px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .nav-buttons {
   display: flex;
