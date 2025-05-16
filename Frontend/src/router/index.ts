@@ -18,6 +18,21 @@ const router = createRouter({
       name: 'sendprompt',
       component: () => import('../views/PromptView.vue'),
     },
+    {
+      path: '/stats',
+      name: 'stats',
+      component: () => import('../views/StatsView.vue'),
+    },
+    {
+      path: '/heroes',
+      name: 'heroes',
+      component: () => import('../views/HeroesView.vue'),
+    },
+    {
+      path: '/player',
+      name: 'player',
+      component: () => import('../views/PlayerView.vue'),
+    },
   ],
 })
 
