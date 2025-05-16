@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Mag 07, 2025 alle 11:31
--- Versione del server: 10.4.32-MariaDB
+-- Creato il: Mag 16, 2025 alle 13:17
+-- Versione del server: 10.4.27-MariaDB
 -- Versione PHP: 8.2.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -31,19 +31,21 @@ CREATE TABLE `clans` (
   `cln_id` int(11) NOT NULL,
   `cln_nome` varchar(25) NOT NULL,
   `cln_punti` int(11) NOT NULL,
-  `cln_pla_id` int(11) NOT NULL
+  `cln_pla_id` int(11) NOT NULL,
+  `cln_ran_id` int(11) NOT NULL,
+  `cln_image` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dump dei dati per la tabella `clans`
 --
 
-INSERT INTO `clans` (`cln_id`, `cln_nome`, `cln_punti`, `cln_pla_id`) VALUES
-(1, 'Legione Oscura', 5100, 4),
-(2, 'Lacrime Ghiacciate', 5900, 2),
-(3, 'Rinascita Fenice', 5490, 7),
-(4, 'Noob Uniti', 1250, 3),
-(5, 'Guardia d\'Elite', 8120, 9);
+INSERT INTO `clans` (`cln_id`, `cln_nome`, `cln_punti`, `cln_pla_id`, `cln_ran_id`, `cln_image`) VALUES
+(1, 'Legione Oscura', 2550, 4, 3, ''),
+(2, 'Lacrime Ghiacciate', 2950, 2, 3, ''),
+(3, 'Rinascita Fenice', 2745, 7, 3, ''),
+(4, 'Noob Uniti', 1250, 3, 2, ''),
+(5, 'Guardia d\'Elite', 4060, 9, 5, '');
 
 -- --------------------------------------------------------
 
@@ -53,19 +55,20 @@ INSERT INTO `clans` (`cln_id`, `cln_nome`, `cln_punti`, `cln_pla_id`) VALUES
 
 CREATE TABLE `classi` (
   `cla_id` int(11) NOT NULL,
-  `cla_nome` varchar(20) NOT NULL
+  `cla_nome` varchar(20) NOT NULL,
+  `cla_image` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dump dei dati per la tabella `classi`
 --
 
-INSERT INTO `classi` (`cla_id`, `cla_nome`) VALUES
-(1, 'Tank'),
-(2, 'Assassino'),
-(3, 'Mago'),
-(4, 'Supporto'),
-(5, 'Tiratore');
+INSERT INTO `classi` (`cla_id`, `cla_nome`, `cla_image`) VALUES
+(1, 'Tank', ''),
+(2, 'Assassino', ''),
+(3, 'Mago', ''),
+(4, 'Supporto', ''),
+(5, 'Tiratore', '');
 
 -- --------------------------------------------------------
 
@@ -77,24 +80,25 @@ CREATE TABLE `eroi` (
   `ero_id` int(11) NOT NULL,
   `ero_nome` varchar(20) NOT NULL,
   `ero_difficolta` int(11) NOT NULL,
-  `ero_cla_id` int(11) DEFAULT NULL
+  `ero_cla_id` int(11) DEFAULT NULL,
+  `ero_image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dump dei dati per la tabella `eroi`
 --
 
-INSERT INTO `eroi` (`ero_id`, `ero_nome`, `ero_difficolta`, `ero_cla_id`) VALUES
-(1, 'Guardiapietra', 2, 1),
-(2, 'Lamaombra', 4, 2),
-(3, 'Tessigelo', 3, 3),
-(4, 'Custodevitale', 3, 4),
-(5, 'Occhiodifalco', 2, 5),
-(6, 'Corazzadura', 1, 1),
-(7, 'Ombratossica', 5, 2),
-(8, 'Piromenta', 4, 3),
-(9, 'Armonia', 2, 4),
-(10, 'Occhiodiferro', 3, 5);
+INSERT INTO `eroi` (`ero_id`, `ero_nome`, `ero_difficolta`, `ero_cla_id`, `ero_image`) VALUES
+(1, 'Guardiapietra', 2, 1, NULL),
+(2, 'Lamaombra', 4, 2, NULL),
+(3, 'Tessigelo', 3, 3, NULL),
+(4, 'Custodevitale', 3, 4, NULL),
+(5, 'Occhiodifalco', 2, 5, NULL),
+(6, 'Corazzadura', 1, 1, NULL),
+(7, 'Ombratossica', 5, 2, NULL),
+(8, 'Piromenta', 4, 3, NULL),
+(9, 'Armonia', 2, 4, NULL),
+(10, 'Occhiodiferro', 3, 5, NULL);
 
 -- --------------------------------------------------------
 
@@ -105,14 +109,14 @@ INSERT INTO `eroi` (`ero_id`, `ero_nome`, `ero_difficolta`, `ero_cla_id`) VALUES
 CREATE TABLE `mappe` (
   `map_id` int(11) NOT NULL,
   `map_nome` varchar(50) NOT NULL,
-  `map_immagine` varchar(255) NOT NULL
+  `map_image` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dump dei dati per la tabella `mappe`
 --
 
-INSERT INTO `mappe` (`map_id`, `map_nome`, `map_immagine`) VALUES
+INSERT INTO `mappe` (`map_id`, `map_nome`, `map_image`) VALUES
 (1, 'Roccaforte Pietranera', 'roccaforte_pietranera.jpg'),
 (2, 'Canyon Gelomorso', 'canyon_gelomorso.jpg'),
 (3, 'Landarde Ember', 'landarde_ember.jpg'),
@@ -265,28 +269,195 @@ CREATE TABLE `players` (
   `pla_livello` int(11) NOT NULL,
   `pla_username` varchar(20) DEFAULT NULL,
   `pla_mmr` int(11) NOT NULL,
-  `pla_cln_id` int(11) DEFAULT NULL
+  `pla_cln_id` int(11) DEFAULT NULL,
+  `pla_ran_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dump dei dati per la tabella `players`
 --
 
-INSERT INTO `players` (`pla_id`, `pla_livello`, `pla_username`, `pla_mmr`, `pla_cln_id`) VALUES
-(1, 25, 'ColpoOmbra', 2450, 1),
-(2, 42, 'ReginaGelo', 3120, 2),
-(3, 18, 'SterminaNoob', 1250, 4),
-(4, 56, 'DioDeiTank', 3870, 5),
-(5, 33, 'CuraBot', 2780, 2),
-(6, 29, 'CecchinoPro', 2650, 1),
-(7, 47, 'SignoreFiamma', 3540, 3),
-(8, 12, 'Principiante123', 850, NULL),
-(9, 63, 'GranMaestro', 4250, 5),
-(10, 21, 'GiuseppeMedio', 1950, 3);
+INSERT INTO `players` (`pla_id`, `pla_livello`, `pla_username`, `pla_mmr`, `pla_cln_id`, `pla_ran_id`) VALUES
+(1, 25, 'ColpoOmbra', 2450, 1, 3),
+(2, 42, 'ReginaGelo', 3120, 2, 4),
+(3, 18, 'SterminaNoob', 1250, 4, 2),
+(4, 56, 'DioDeiTank', 3870, 5, 4),
+(5, 33, 'CuraBot', 2780, 2, 3),
+(6, 29, 'CecchinoPro', 2650, 1, 3),
+(7, 47, 'SignoreFiamma', 3540, 3, 4),
+(8, 12, 'Principiante123', 850, NULL, 1),
+(9, 63, 'GranMaestro', 4250, 5, 5),
+(10, 21, 'GiuseppeMedio', 1950, 3, 2);
 
 --
 -- Trigger `players`
 --
+DELIMITER $$
+CREATE TRIGGER `after_player_clan_points_delete` AFTER DELETE ON `players` FOR EACH ROW BEGIN
+    IF OLD.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cln_punti = (
+                SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                FROM players
+                WHERE pla_cln_id = OLD.pla_cln_id
+            ),
+            cla_ran_id = (
+                SELECT ran_id
+                FROM ranks
+                WHERE (
+                    SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                    FROM players
+                    WHERE pla_cln_id = OLD.pla_cln_id
+                ) BETWEEN ran_min AND ran_max
+                LIMIT 1
+            )
+        WHERE cln_id = OLD.pla_cln_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_clan_points_insert` AFTER INSERT ON `players` FOR EACH ROW BEGIN
+    IF NEW.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cln_punti = (
+                SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                FROM players
+                WHERE pla_cln_id = NEW.pla_cln_id
+            ),
+            cla_ran_id = (
+                SELECT ran_id
+                FROM ranks
+                WHERE (
+                    SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                    FROM players
+                    WHERE pla_cln_id = NEW.pla_cln_id
+                ) BETWEEN ran_min AND ran_max
+                LIMIT 1
+            )
+        WHERE cln_id = NEW.pla_cln_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_clan_points_update` AFTER UPDATE ON `players` FOR EACH ROW BEGIN
+    -- Aggiorna il vecchio clan (se esisteva)
+    IF OLD.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cln_punti = (
+                SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                FROM players
+                WHERE pla_cln_id = OLD.pla_cln_id
+            ),
+            cla_ran_id = (
+                SELECT ran_id
+                FROM ranks
+                WHERE (
+                    SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                    FROM players
+                    WHERE pla_cln_id = OLD.pla_cln_id
+                ) BETWEEN ran_min AND ran_max
+                LIMIT 1
+            )
+        WHERE cln_id = OLD.pla_cln_id;
+    END IF;
+    -- Aggiorna il nuovo clan (se esiste)
+    IF NEW.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cln_punti = (
+                SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                FROM players
+                WHERE pla_cln_id = NEW.pla_cln_id
+            ),
+            cla_ran_id = (
+                SELECT ran_id
+                FROM ranks
+                WHERE (
+                    SELECT COALESCE(SUM(pla_mmr),0) / NULLIF(COUNT(*),0)
+                    FROM players
+                    WHERE pla_cln_id = NEW.pla_cln_id
+                ) BETWEEN ran_min AND ran_max
+                LIMIT 1
+            )
+        WHERE cln_id = NEW.pla_cln_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_clan_rank_delete` AFTER DELETE ON `players` FOR EACH ROW BEGIN
+    IF OLD.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cla_ran_id = (
+            SELECT ran_id
+            FROM ranks
+            WHERE (
+                SELECT COALESCE(AVG(pla_mmr), 0)
+                FROM players
+                WHERE pla_cln_id = OLD.pla_cln_id
+            ) BETWEEN ran_min AND ran_max
+            LIMIT 1
+        )
+        WHERE cln_id = OLD.pla_cln_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_clan_rank_insert` AFTER INSERT ON `players` FOR EACH ROW BEGIN
+    IF NEW.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cla_ran_id = (
+            SELECT ran_id
+            FROM ranks
+            WHERE (
+                SELECT COALESCE(AVG(pla_mmr), 0)
+                FROM players
+                WHERE pla_cln_id = NEW.pla_cln_id
+            ) BETWEEN ran_min AND ran_max
+            LIMIT 1
+        )
+        WHERE cln_id = NEW.pla_cln_id;
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_clan_rank_update` AFTER UPDATE ON `players` FOR EACH ROW BEGIN
+    -- Aggiorna il rank del vecchio clan (se esisteva)
+    IF OLD.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cla_ran_id = (
+            SELECT ran_id
+            FROM ranks
+            WHERE (
+                SELECT COALESCE(AVG(pla_mmr), 0)
+                FROM players
+                WHERE pla_cln_id = OLD.pla_cln_id
+            ) BETWEEN ran_min AND ran_max
+            LIMIT 1
+        )
+        WHERE cln_id = OLD.pla_cln_id;
+    END IF;
+    -- Aggiorna il rank del nuovo clan (se esiste)
+    IF NEW.pla_cln_id IS NOT NULL THEN
+        UPDATE clans
+        SET cla_ran_id = (
+            SELECT ran_id
+            FROM ranks
+            WHERE (
+                SELECT COALESCE(AVG(pla_mmr), 0)
+                FROM players
+                WHERE pla_cln_id = NEW.pla_cln_id
+            ) BETWEEN ran_min AND ran_max
+            LIMIT 1
+        )
+        WHERE cln_id = NEW.pla_cln_id;
+    END IF;
+END
+$$
+DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `after_player_clan_update` AFTER UPDATE ON `players` FOR EACH ROW BEGIN
     -- Se il clan è cambiato o l'MMR è cambiato
@@ -346,6 +517,34 @@ CREATE TRIGGER `after_player_insert` AFTER INSERT ON `players` FOR EACH ROW BEGI
 END
 $$
 DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_mmr_insert` AFTER INSERT ON `players` FOR EACH ROW BEGIN
+    UPDATE players
+    SET pla_ran_id = (
+        SELECT ran_id
+        FROM ranks
+        WHERE NEW.pla_mmr BETWEEN ran_min AND ran_max
+        LIMIT 1
+    )
+    WHERE pla_id = NEW.pla_id;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_player_mmr_update` AFTER UPDATE ON `players` FOR EACH ROW BEGIN
+    IF NEW.pla_mmr <> OLD.pla_mmr THEN
+        UPDATE players
+        SET pla_ran_id = (
+            SELECT ran_id
+            FROM ranks
+            WHERE NEW.pla_mmr BETWEEN ran_min AND ran_max
+            LIMIT 1
+        )
+        WHERE pla_id = NEW.pla_id;
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -357,21 +556,22 @@ CREATE TABLE `ranks` (
   `ran_id` int(11) NOT NULL,
   `ran_nome` varchar(15) NOT NULL,
   `ran_min` int(11) NOT NULL,
-  `ran_max` int(11) NOT NULL
+  `ran_max` int(11) NOT NULL,
+  `ran_image` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dump dei dati per la tabella `ranks`
 --
 
-INSERT INTO `ranks` (`ran_id`, `ran_nome`, `ran_min`, `ran_max`) VALUES
-(1, 'Bronzo', 0, 999),
-(2, 'Argento', 1000, 1999),
-(3, 'Oro', 2000, 2999),
-(4, 'Platino', 3000, 3999),
-(5, 'Diamante', 4000, 4999),
-(6, 'Maestro', 5000, 5999),
-(7, 'Gran Maestro', 6000, 9999);
+INSERT INTO `ranks` (`ran_id`, `ran_nome`, `ran_min`, `ran_max`, `ran_image`) VALUES
+(1, 'Bronzo', 0, 999, ''),
+(2, 'Argento', 1000, 1999, ''),
+(3, 'Oro', 2000, 2999, ''),
+(4, 'Platino', 3000, 3999, ''),
+(5, 'Diamante', 4000, 4999, ''),
+(6, 'Maestro', 5000, 5999, ''),
+(7, 'Gran Maestro', 6000, 9999, '');
 
 -- --------------------------------------------------------
 
@@ -415,7 +615,8 @@ INSERT INTO `utenti` (`ute_id`, `ute_username`, `ute_email`, `ute_password`, `ut
 ALTER TABLE `clans`
   ADD PRIMARY KEY (`cln_id`),
   ADD UNIQUE KEY `cln_nome` (`cln_nome`),
-  ADD KEY `fk_clan_player` (`cln_pla_id`);
+  ADD KEY `fk_clan_player` (`cln_pla_id`),
+  ADD KEY `fk_cla_ran_id` (`cln_ran_id`);
 
 --
 -- Indici per le tabelle `classi`
@@ -465,7 +666,8 @@ ALTER TABLE `partite`
 ALTER TABLE `players`
   ADD PRIMARY KEY (`pla_id`),
   ADD UNIQUE KEY `pla_username` (`pla_username`),
-  ADD KEY `pla_cln_id` (`pla_cln_id`);
+  ADD KEY `pla_cln_id` (`pla_cln_id`),
+  ADD KEY `fk_pla_ran_id` (`pla_ran_id`);
 
 --
 -- Indici per le tabelle `ranks`
@@ -554,6 +756,7 @@ ALTER TABLE `utenti`
 -- Limiti per la tabella `clans`
 --
 ALTER TABLE `clans`
+  ADD CONSTRAINT `fk_cla_ran_id` FOREIGN KEY (`cln_ran_id`) REFERENCES `ranks` (`ran_id`),
   ADD CONSTRAINT `fk_clan_player` FOREIGN KEY (`cln_pla_id`) REFERENCES `players` (`pla_id`);
 
 --
@@ -581,6 +784,7 @@ ALTER TABLE `partite`
 -- Limiti per la tabella `players`
 --
 ALTER TABLE `players`
+  ADD CONSTRAINT `fk_pla_ran_id` FOREIGN KEY (`pla_ran_id`) REFERENCES `ranks` (`ran_id`),
   ADD CONSTRAINT `players_ibfk_1` FOREIGN KEY (`pla_cln_id`) REFERENCES `clans` (`cln_id`);
 
 --
