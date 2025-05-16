@@ -1,13 +1,27 @@
 <script setup lang="tsx">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import InputText from 'primevue/inputtext';
 import Card from 'primevue/card';
 
-// Variabili reattive per i testi dinamici
-const numPlayers = ref('Num Players'); // Sostituisci con dati reali in futuro
-const numGames = ref('Num Games');     // Sostituisci con dati reali in futuro
-const descrizione = ref('Descrizione'); // Sostituisci con dati reali in futuro
-const search = ref('');
+const numPlayers = ref(0);
+const numGames = ref(0);
+
+const getNumberPlayers = async () => {
+  const response = await fetch('http://localhost/StatsProject/backend/Player/getNumberPlayers.php');
+  const data = await response.json();
+  numPlayers.value = data;
+}
+
+const getNumberGames = async () => {
+  const response = await fetch('http://localhost/StatsProject/backend/Partite/getNumberGames.php');
+  const data = await response.json();
+  numGames.value = data;
+}
+
+onMounted(() => {
+  getNumberPlayers();
+  getNumberGames();
+});
 </script>
 
 <template>
@@ -32,12 +46,23 @@ const search = ref('');
       </span>
     </div>
     <div class="stats-row">
-      <div class="stat-text">{{ numPlayers }}</div>
-      <div class="stat-text">{{ numGames }}</div>
+      <div class="stat-text">Numero di Player: {{ numPlayers }}</div>
+      <div class="stat-text">Numero di Partite: {{ numGames }}</div>
     </div>
     <Card class="descrizione-box">
       <template #content>
-        <span>{{ descrizione }}</span>
+        <span>
+          Benvenuti in Big Black Death Stats, il portale dedicato alle statistiche del gioco Big Black Death.
+          Questo sito ti permette di:
+          <ul>
+            <li>Cercare e visualizzare statistiche dettagliate dei giocatori</li>
+            <li>Consultare informazioni sui clan</li>
+            <li>Esplorare dati sugli eroi più utilizzati</li>
+            <li>Analizzare le partite giocate</li>
+          </ul>
+          Attualmente monitoriamo {{ numPlayers }} giocatori e {{ numGames }} partite nel nostro database.
+          Usa la barra di ricerca sopra per trovare rapidamente giocatori, clan o eroi specifici.
+        </span>
       </template>
     </Card>
   </div>
