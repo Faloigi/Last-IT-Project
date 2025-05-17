@@ -7,13 +7,13 @@ const numPlayers = ref(0);
 const numGames = ref(0);
 
 const getNumberPlayers = async () => {
-  const response = await fetch('http://localhost/StatsProject/backend/Player/getNumberPlayers.php');
+  const response = await fetch('http://localhost/BigBlackDeath/backend/Player/getNumberPlayers.php');
   const data = await response.json();
   numPlayers.value = data;
 }
 
 const getNumberGames = async () => {
-  const response = await fetch('http://localhost/StatsProject/backend/Partite/getNumberGames.php');
+  const response = await fetch('http://localhost/BigBlackDeath/backend/Partite/getNumberGames.php');
   const data = await response.json();
   numGames.value = data;
 }

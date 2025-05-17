@@ -11,7 +11,6 @@ import { RouterLink } from 'vue-router';
       </RouterLink>
     </div>
     <nav class="nav-buttons">
-      <RouterLink to="/player" class="nav-btn">Player</RouterLink>
       <RouterLink to="/stats" class="nav-btn">Statistiche</RouterLink>
       <RouterLink to="/heroes" class="nav-btn">Eroi</RouterLink>
       <RouterLink to="/login" class="nav-btn">Login</RouterLink>

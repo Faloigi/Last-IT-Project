@@ -9,26 +9,74 @@
     <div class="filters">
       <input v-model="search" placeholder="Cerca Player/Clan/Eroe..." />
       <template v-if="activeTab === 'eroi'">
-        <select v-model="classe">
-          <option value="" disabled selected hidden>Classe</option>
-        </select>
-        <select v-model="mappa">
-          <option value="" disabled selected hidden>Mappe</option>
-        </select>
-        <select v-model="rank">
-          <option value="" disabled selected hidden>Rank</option>
-        </select>
+        <Dropdown v-model="classe" :options="classeOptions" placeholder="Classe" class="dropdown-filter" 
+          :panelStyleClass="'green-dropdown-panel'"
+          :emptyMessage="''"
+          :emptyMessageTemplate="emptyMessageTemplate"
+          :pt="{
+            root: { style: 'background-color: #09351e; border: none;' },
+            label: { style: 'color: white; background-color: #09351e;' },
+            trigger: { style: 'color: white; background-color: #09351e;' },
+            panel: { style: 'background-color: #09351e; color: white;' },
+            emptyMessage: { style: 'background-color: #09351e; color: white;' }
+          }" />
+        <Dropdown v-model="mappa" :options="mappaOptions" placeholder="Mappe" class="dropdown-filter"
+          :panelStyleClass="'green-dropdown-panel'"
+          :emptyMessage="''"
+          :emptyMessageTemplate="emptyMessageTemplate"
+          :pt="{
+            root: { style: 'background-color: #09351e; border: none;' },
+            label: { style: 'color: white; background-color: #09351e;' },
+            trigger: { style: 'color: white; background-color: #09351e;' },
+            panel: { style: 'background-color: #09351e; color: white;' },
+            emptyMessage: { style: 'background-color: #09351e; color: white;' }
+          }" />
+        <Dropdown v-model="rank" :options="rankOptions" placeholder="Rank" class="dropdown-filter" 
+          :panelStyleClass="'green-dropdown-panel'"
+          :emptyMessage="''"
+          :emptyMessageTemplate="emptyMessageTemplate"
+          :pt="{
+            root: { style: 'background-color: #09351e; border: none;' },
+            label: { style: 'color: white; background-color: #09351e;' },
+            trigger: { style: 'color: white; background-color: #09351e;' },
+            panel: { style: 'background-color: #09351e; color: white;' },
+            emptyMessage: { style: 'background-color: #09351e; color: white;' }
+          }" />
       </template>
       <template v-else-if="activeTab === 'player'">
-        <select v-model="modalita">
-          <option value="" disabled selected hidden>Modalità</option>
-        </select>
-        <select v-model="mappa">
-          <option value="" disabled selected hidden>Mappe</option>
-        </select>
-        <select v-model="rank">
-          <option value="" disabled selected hidden>Rank</option>
-        </select>
+        <Dropdown v-model="modalita" :options="modalitaOptions" placeholder="Modalità" class="dropdown-filter" 
+          :panelStyleClass="'green-dropdown-panel'"
+          :emptyMessage="''"
+          :emptyMessageTemplate="emptyMessageTemplate"
+          :pt="{
+            root: { style: 'background-color: #09351e; border: none;' },
+            label: { style: 'color: white; background-color: #09351e;' },
+            trigger: { style: 'color: white; background-color: #09351e;' },
+            panel: { style: 'background-color: #09351e; color: white;' },
+            emptyMessage: { style: 'background-color: #09351e; color: white;' }
+          }" />
+        <Dropdown v-model="mappa" :options="mappaOptions" placeholder="Mappe" class="dropdown-filter" 
+          :panelStyleClass="'green-dropdown-panel'"
+          :emptyMessage="''"
+          :emptyMessageTemplate="emptyMessageTemplate"
+          :pt="{
+            root: { style: 'background-color: #09351e; border: none;' },
+            label: { style: 'color: white; background-color: #09351e;' },
+            trigger: { style: 'color: white; background-color: #09351e;' },
+            panel: { style: 'background-color: #09351e; color: white;' },
+            emptyMessage: { style: 'background-color: #09351e; color: white;' }
+          }" />
+        <Dropdown v-model="rank" :options="rankOptions" placeholder="Rank" class="dropdown-filter" 
+          :panelStyleClass="'green-dropdown-panel'"
+          :emptyMessage="''"
+          :emptyMessageTemplate="emptyMessageTemplate"
+          :pt="{
+            root: { style: 'background-color: #09351e; border: none;' },
+            label: { style: 'color: white; background-color: #09351e;' },
+            trigger: { style: 'color: white; background-color: #09351e;' },
+            panel: { style: 'background-color: #09351e; color: white;' },
+            emptyMessage: { style: 'background-color: #09351e; color: white;' }
+          }" />
       </template>
     </div>
     <div class="table-container">
@@ -65,14 +113,14 @@
         </Column>
       </DataTable>
       <DataTable v-else-if="activeTab === 'player'" :value="players">
-        <Column field="posizione" header="Posizione" :sortable="true">
+        <Column field="posizione" header="Posizione">
           <template #body="slotProps">
             {{ slotProps.index + 1 }}
           </template>
         </Column>
-        <Column field="player" header="Player" :sortable="true">
+        <Column field="username" header="Player" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.player }}
+            <RouterLink :to="`/player/${slotProps.data.username}`" class="nav-btn">{{ slotProps.data.username }}</RouterLink>
           </template>
         </Column>
         <Column field="kd" header="KD" :sortable="true">
@@ -80,9 +128,9 @@
             {{ slotProps.data.kd }}
           </template>
         </Column>
-        <Column field="vittorie" header="%Vittorie" :sortable="true">
+        <Column field="winrate" header="%Vittorie" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.vittorie }}
+            {{ slotProps.data.winrate }}
           </template>
         </Column>
         <Column field="danni" header="%Danni" :sortable="true">
@@ -90,21 +138,21 @@
             {{ slotProps.data.danni }}
           </template>
         </Column>
-        <Column field="partite" header="Partite" :sortable="true">
+        <Column field="partite_giocate" header="Partite" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.partite }}
+            {{ slotProps.data.partite_giocate }}
           </template>
         </Column>
       </DataTable>
       <DataTable v-else :value="clans">
-        <Column field="posizione" header="Posizione" :sortable="true">
+        <Column field="posizione" header="Posizione">
           <template #body="slotProps">
             {{ slotProps.index + 1 }}
           </template>
         </Column>
-        <Column field="clan" header="Clan" :sortable="true">
+        <Column field="nome" header="Clan" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.clan }}
+            {{ slotProps.data.nome }}
           </template>
         </Column>
         <Column field="punti" header="Punti" :sortable="true">
@@ -122,9 +170,9 @@
             {{ slotProps.data.sconfitte }}
           </template>
         </Column>
-        <Column field="partite" header="Partite" :sortable="true">
+        <Column field="partecipanti" header="Partecipanti" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.partite }}
+            {{ slotProps.data.partecipanti }}
           </template>
         </Column>
       </DataTable>
@@ -134,45 +182,40 @@
 
 <script setup>
 import { Column, DataTable } from 'primevue'
+import Dropdown from 'primevue/dropdown'
 import { ref, computed, onMounted } from 'vue'
 
 const activeTab = ref('eroi')
-const search = ref('')
-const classe = ref('')
-const mappa = ref('')
-const rank = ref('')
-const modalita = ref('')
 
 const eroi = ref([])
 const players = ref([])
 const clans = ref([])
 
+const classe = ref(null)
+const mappa = ref(null)
+const rank = ref(null)
+const modalita = ref(null)
+
+const classeOptions = []
+const mappaOptions = []
+const rankOptions = []
+const modalitaOptions = []
+
+async function getStatsPlayer(){
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Player/getStatsPlayer.php')
+  players.value = await res.json()
+}
+
+async function getStatsClan(){
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Clan/getStatsClan.php')
+  clans.value = await res.json()
+}
+
 const setTab = (tab) => { activeTab.value = tab }
 
-// Esempio di fetch dati da PHP
-const fetchEroi = async () => {
-  try {
-    const res = await fetch('/api/stats_eroi.php')
-    eroi.value = await res.json()
-  } catch (e) { eroi.value = [] }
-}
-const fetchPlayers = async () => {
-  try {
-    const res = await fetch('/api/stats_player.php')
-    players.value = await res.json()
-  } catch (e) { players.value = [] }
-}
-const fetchClans = async () => {
-  try {
-    const res = await fetch('/api/stats_clan.php')
-    clans.value = await res.json()
-  } catch (e) { clans.value = [] }
-}
-
 onMounted(() => {
-  fetchEroi()
-  fetchPlayers()
-  fetchClans()
+  getStatsPlayer()
+  getStatsClan()
 })
 
 // Filtri (esempio base, puoi aggiungere altri filtri)
@@ -191,6 +234,14 @@ const activeTabLabel = computed(() => {
   if (activeTab.value === 'player') return 'Player'
   return 'Clan'
 })
+
+// Personalizza il messaggio "No available options"
+const emptyMessageTemplate = (options) => {
+  return {
+    props: options,
+    template: `<div class="custom-empty-message">No available options</div>`
+  }
+}
 </script>
 
 <style scoped>
@@ -198,8 +249,44 @@ const activeTabLabel = computed(() => {
 .tabs { margin-bottom: 1rem; }
 .tabs button { margin-right: 1rem; background: none; border: none; color: #fff; font-size: 1.2rem; border-bottom: 2px solid transparent; cursor: pointer; }
 .tabs button.active { border-bottom: 2px solid #1affb2; }
-.filters { margin-bottom: 1rem; }
-.filters input, .filters select { margin-right: 1rem; padding: 0.4rem 0.8rem; border-radius: 6px; border: none; background: #09351e; color: #fff; }
+.filters {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+.filters input, .filters select, .filters .p-dropdown {
+  margin-right: 0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: none;
+  background: #09351e;
+  color: #fff;
+}
+::v-deep(.filters .p-dropdown .p-dropdown-label) {
+  color: #fff;
+}
+::v-deep(.filters .p-dropdown .p-dropdown-label.p-placeholder) {
+  color: #b6e2c6;
+  opacity: 1;
+}
+::v-deep(.filters .p-dropdown) {
+  background: #09351e !important;
+  border: none !important;
+}
+::v-deep(.filters .p-dropdown .p-dropdown-trigger) {
+  color: #fff;
+}
+::v-deep(.filters .p-dropdown-panel) {
+  background: #09351e;
+  color: #fff;
+}
+::v-deep(.filters .p-dropdown-item) {
+  color: #fff;
+}
+::v-deep(.filters .p-dropdown-item.p-highlight) {
+  background: #145c3a;
+  color: #1affb2;
+}
 .table-container { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; background: #0d2b1a; }
 th, td { padding: 0.7rem 1rem; border: 1px solid #1affb2; }
@@ -228,5 +315,45 @@ th { background: #09351e; }
 }
 ::v-deep(.p-datatable-tbody > tr:hover) {
   background: #145c3a;
+}
+
+::v-deep(.p-dropdown) {
+  background: #09351e !important;
+  border: none !important;
+  color: #fff !important;
+  margin-right: 0;
+  padding: 0;
+  border-radius: 6px;
+}
+
+::v-deep(.p-dropdown-panel) {
+  background-color: #09351e !important;
+  border-color: #1affb2 !important;
+}
+
+::v-deep(.p-dropdown-items) {
+  background-color: #09351e !important;
+}
+
+::v-deep(.p-dropdown-empty-message) {
+  background-color: #09351e !important;
+  color: white !important;
+}
+
+::v-deep(.custom-empty-message) {
+  background-color: #09351e !important;
+  color: white !important;
+  padding: 0.5rem;
+}
+
+/* Override di elementi specifici del panel */
+:deep(.green-dropdown-panel) {
+  background-color: #09351e !important;
+  color: white !important;
+}
+
+:deep(.green-dropdown-panel *) {
+  background-color: #09351e !important;
+  color: white !important;
 }
 </style>

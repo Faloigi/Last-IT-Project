@@ -1,14 +1,14 @@
 <template>
   <div class="player-container">
-    <h1>Player</h1>
+    <h1>{{ username }}</h1>
     <div class="player-layout">
       <!-- Colonna sinistra -->
       <div class="player-sidebar">
-        <button class="rank-btn">{{ playerData.rank || 'Rank' }}</button>
+        <button class="rank-btn">{{ player.rank || 'Rank' }}</button>
         <div class="heroes-played">
           <div class="sidebar-title">Eroi Giocati</div>
-          <div v-for="hero in playerData.heroesPlayed" :key="hero.id" class="hero-played-card">
-            <span>{{ hero.nome }}</span>
+          <div v-for="hero in player.heroesPlayed" :key="hero.id" class="hero-played-card">
+            <span>{{ hero.nome || hero.name || 'Eroe' }}</span>
           </div>
         </div>
       </div>
@@ -23,14 +23,8 @@
       <!-- Colonna destra -->
       <div class="player-filters">
         <input v-model="searchHero" placeholder="Cerca per Eroe" />
-        <select v-model="modalita">
-          <option value="">Tutte le modalità</option>
-          <option v-for="m in modalitaDisponibili" :key="m" :value="m">{{ m }}</option>
-        </select>
-        <select v-model="mappa">
-          <option value="">Tutte le mappe</option>
-          <option v-for="m in mappeDisponibili" :key="m" :value="m">{{ m }}</option>
-        </select>
+        <Dropdown v-model="modalita" :options="modalitaOptions" optionLabel="name" optionValue="value" placeholder="Tutte le modalità" class="p-dropdown-green" />
+        <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Tutte le mappe" class="p-dropdown-green" />
       </div>
     </div>
   </div>
@@ -38,51 +32,93 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import Dropdown from 'primevue/dropdown'
 
-const playerData = ref({
+// Variabili per i dati del player
+const player = ref({
   rank: '',
   heroesPlayed: [],
   matches: []
 })
+const route = useRoute()
+const username = computed(() => route.params.username || 'Player')
 
+// Variabili per i filtri
 const searchHero = ref('')
 const modalita = ref('')
 const mappa = ref('')
 
-// Popola dinamicamente le modalità e le mappe disponibili
-const modalitaDisponibili = computed(() => {
-  const set = new Set()
-  playerData.value.matches.forEach(m => m.modalita && set.add(m.modalita))
-  return Array.from(set)
-})
-const mappeDisponibili = computed(() => {
-  const set = new Set()
-  playerData.value.matches.forEach(m => m.mappa && set.add(m.mappa))
-  return Array.from(set)
-})
-
-// Fetch dati player da PHP
-const fetchPlayerData = async () => {
-  try {
-    const res = await fetch('/api/player.php')
-    playerData.value = await res.json()
-  } catch (e) {
-    playerData.value = { rank: '', heroesPlayed: [], matches: [] }
+// Personalizza il messaggio "No available options"
+const emptyMessageTemplate = (options) => {
+  return {
+    props: options,
+    template: `<div class="custom-empty-message">No available options</div>`
   }
 }
 
-onMounted(() => {
-  fetchPlayerData()
+// Fetch dati player da PHP
+async function getPlayerData() {
+  try {
+    const res = await fetch('http://localhost/BigBlackDeath/backend/Player/getPlayerData.php?username=' + username.value)
+    player.value = await res.json()
+  } catch (e) {
+    console.error('Errore nel caricamento dei dati:', e)
+    player.value = { rank: '', heroesPlayed: [], matches: [] }
+  }
+}
+
+// Popola dinamicamente le modalità e le mappe disponibili
+const modalitaDisponibili = computed(() => {
+  const set = new Set()
+  if (player.value.matches) {
+    player.value.matches.forEach(m => m.modalita && set.add(m.modalita))
+  }
+  return Array.from(set)
+})
+
+// Formatta le opzioni per PrimeVue Dropdown
+const modalitaOptions = computed(() => {
+  const options = modalitaDisponibili.value.map(m => ({
+    name: m,
+    value: m
+  }))
+  options.unshift({ name: 'Tutte le modalità', value: '' })
+  return options
+})
+
+const mappeDisponibili = computed(() => {
+  const set = new Set()
+  if (player.value.matches) {
+    player.value.matches.forEach(m => m.mappa && set.add(m.mappa))
+  }
+  return Array.from(set)
+})
+
+// Formatta le opzioni per PrimeVue Dropdown
+const mappaOptions = computed(() => {
+  const options = mappeDisponibili.value.map(m => ({
+    name: m,
+    value: m
+  }))
+  options.unshift({ name: 'Tutte le mappe', value: '' })
+  return options
 })
 
 // Filtra le partite in base ai filtri selezionati
-const filteredMatches = computed(() =>
-  playerData.value.matches.filter(match =>
+const filteredMatches = computed(() => {
+  if (!player.value.matches) return []
+  
+  return player.value.matches.filter(match =>
     (!searchHero.value || match.eroe?.toLowerCase().includes(searchHero.value.toLowerCase())) &&
     (!modalita.value || match.modalita === modalita.value) &&
     (!mappa.value || match.mappa === mappa.value)
   )
-)
+})
+
+onMounted(() => {
+  getPlayerData()
+})
 </script>
 
 <style scoped>
@@ -195,5 +231,43 @@ h1 {
   .player-main {
     width: 100%;
   }
+}
+.p-dropdown-green {
+  width: 100%;
+  padding: 0;
+  border-radius: 10px;
+  border: none;
+  background: #09351e;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+:deep(.p-dropdown-green .p-dropdown-label) {
+  padding: 0.7rem 1.2rem;
+  color: #fff;
+  background: #09351e;
+}
+
+:deep(.p-dropdown-green .p-dropdown-trigger) {
+  background: #09351e;
+  color: #fff;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper) {
+  background: #09351e;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-item) {
+  color: #fff;
+  background: #09351e;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-item:hover) {
+  background: #145c3a;
+}
+
+:deep(.p-dropdown-panel .p-dropdown-empty-message) {
+  background: #09351e;
+  color: #fff;
 }
 </style>
