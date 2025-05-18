@@ -4,7 +4,10 @@
     <div class="player-layout">
       <!-- Colonna sinistra -->
       <div class="player-sidebar">
-        <button class="rank-btn">{{ player.rank || 'Rank' }}</button>
+        <div class="rank-btn">
+          <img v-if="player.rank_img" :src="player.rank_img" :alt="player.rank" class="rank-img" />
+          <span v-else>{{ player.rank || 'Rank' }}</span>
+        </div>
         <div class="heroes-played">
           <div class="sidebar-title">Eroi Giocati</div>
           <div v-for="hero in player.heroesPlayed" :key="hero.id" class="hero-played-card">
@@ -15,9 +18,32 @@
       <!-- Colonna centrale -->
       <div class="player-main">
         <div class="main-title">Partite Giocate</div>
-        <div v-for="match in filteredMatches" :key="match.id" class="match-card">
-          <div class="match-title">{{ match.nome || 'PARTITA' }}</div>
-          <!-- Puoi aggiungere dettagli della partita qui -->
+        <div v-for="match in filteredMatches" :key="match.par_id" class="match-card-opgg" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
+          <!-- Immagine eroe giocato -->
+          <div class="match-hero-img">
+            <img v-if="match.eroe_img" :src="match.eroe_img" :alt="match.eroe" />
+            <div v-else class="img-placeholder">{{ match.eroe?.charAt(0) }}</div>
+          </div>
+          <!-- Centro: risultato, KDA, dettagli -->
+          <div class="match-center">
+            <div class="match-result" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
+              {{ match.risultato === 'Vinto' ? 'Vittoria' : 'Sconfitta' }}
+            </div>
+            <div class="match-kd">
+              {{ (match.morti && match.morti > 0) ? (match.uccisioni / match.morti).toFixed(1) : match.uccisioni }}
+              <span class="kd-label">K/D</span>
+            </div>
+            <div class="match-kd-details">
+              {{ match.uccisioni }}/{{ match.morti }}
+            </div>
+            <div class="match-meta">
+              <span>{{ match.modalita }}</span> - <span>{{ match.mappa }}</span> <span v-if="match.data">- {{ new Date(match.data).toLocaleDateString() }}</span>
+            </div>
+          </div>
+          <!-- Lista partecipanti -->
+          <div class="match-players">
+            <div v-for="p in match.partecipanti" :key="p" class="player-name" :class="{ highlight: p === player.username }">{{ p }}</div>
+          </div>
         </div>
       </div>
       <!-- Colonna destra -->
@@ -108,7 +134,7 @@ const mappaOptions = computed(() => {
 // Filtra le partite in base ai filtri selezionati
 const filteredMatches = computed(() => {
   if (!player.value.matches) return []
-  
+
   return player.value.matches.filter(match =>
     (!searchHero.value || match.eroe?.toLowerCase().includes(searchHero.value.toLowerCase())) &&
     (!modalita.value || match.modalita === modalita.value) &&
@@ -149,11 +175,27 @@ h1 {
   color: #fff;
   font-size: 1.5rem;
   border: none;
-  border-radius: 12px;
-  padding: 1rem 2.5rem;
+  border-radius: 18px;
+  padding: 0.7rem 0;
   font-weight: bold;
   margin-bottom: 1rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  min-width: 120px;
+}
+.rank-img {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d2b1a 60%, #19d86b22 100%);
+  box-shadow: 0 4px 24px #000a, 0 0 0 10px #19d86b33, 0 0 24px 4px #19d86b44;
+  padding: 16px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 .heroes-played {
   background: #09351e;
@@ -188,19 +230,114 @@ h1 {
   text-align: center;
   padding: 1.2rem 0;
   margin-bottom: 1.2rem;
+  width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
-.match-card {
+.match-card-opgg {
   background: #09351e;
-  border-radius: 12px;
-  padding: 2.2rem 0;
+  border-radius: 14px;
   margin-bottom: 1.2rem;
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: bold;
-  min-height: 100px;
+  display: flex;
+  align-items: center;
+  padding: 1.2rem 2rem;
+  gap: 2.5rem;
+  box-shadow: 0 2px 12px #0005;
+  transition: background 0.2s;
+  width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.match-card-opgg.win {
+  background: #09351e;
+}
+.match-card-opgg.lose {
+  background: #2c1818;
+}
+.match-hero-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #0d2b1a;
+}
+.match-hero-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #fff;
+  background: #145c3a;
+  border-radius: 12px;
+}
+.match-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+.match-result {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 0.2rem;
+  color: #fff;
+  padding: 0.2rem 1.1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+.match-result.win {
+  background: #19d86b;
+  color: #0a2e1a;
+}
+.match-result.lose {
+  background: #e74c3c;
+  color: #fff;
+}
+.match-kd {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 0.1rem;
+}
+.match-kd-details {
+  font-size: 1.3rem;
+  color: #b6e2c6;
+  margin-bottom: 0.2rem;
+}
+.match-meta {
+  font-size: 1rem;
+  color: #b6e2c6;
+  margin-top: 0.2rem;
+}
+.match-players {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 120px;
+  align-items: flex-end;
+}
+.player-name {
+  font-size: 1.1rem;
+  color: #fff;
+  padding: 0.1rem 0.5rem;
+  border-radius: 6px;
+}
+.player-name.highlight {
+  background: #19d86b;
+  color: #0a2e1a;
+  font-weight: bold;
 }
 .player-filters {
   min-width: 220px;
@@ -269,5 +406,12 @@ h1 {
 :deep(.p-dropdown-panel .p-dropdown-empty-message) {
   background: #09351e;
   color: #fff;
+}
+
+.kd-label {
+  font-size: 1.1rem;
+  color: #b6e2c6;
+  margin-left: 0.7rem;
+  font-weight: 500;
 }
 </style>
