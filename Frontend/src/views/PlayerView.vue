@@ -5,7 +5,7 @@
       <!-- Colonna sinistra -->
       <div class="player-sidebar">
         <div class="rank-btn">
-          <img v-if="player.rank_img" :src="player.rank_img" :alt="player.rank" class="rank-img" />
+          <img v-if="player.rank_img" :src="player.rank_img" class="rank-img" />
           <span v-else>{{ player.rank || 'Rank' }}</span>
         </div>
         <div class="heroes-played">
@@ -103,12 +103,9 @@ const modalitaDisponibili = computed(() => {
   return Array.from(set)
 })
 
-// Formatta le opzioni per PrimeVue Dropdown
+// Query SQL: SELECT mod_id, mod_nome FROM modalita
 const modalitaOptions = computed(() => {
-  const options = modalitaDisponibili.value.map(m => ({
-    name: m,
-    value: m
-  }))
+  const options = modalitaDisponibili.value.map(m => ({ name: m, value: m }))
   options.unshift({ name: 'Tutte le modalità', value: '' })
   return options
 })
@@ -121,12 +118,9 @@ const mappeDisponibili = computed(() => {
   return Array.from(set)
 })
 
-// Formatta le opzioni per PrimeVue Dropdown
+// Query SQL: SELECT map_id, map_nome, map_image FROM mappe
 const mappaOptions = computed(() => {
-  const options = mappeDisponibili.value.map(m => ({
-    name: m,
-    value: m
-  }))
+  const options = mappeDisponibili.value.map(m => ({ name: m, value: m }))
   options.unshift({ name: 'Tutte le mappe', value: '' })
   return options
 })
@@ -158,6 +152,13 @@ onMounted(() => {
 h1 {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
+  text-align: center;
+  margin-top: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Poppins', sans-serif;
 }
 .player-layout {
   display: flex;

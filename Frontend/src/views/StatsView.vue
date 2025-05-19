@@ -9,74 +9,14 @@
     <div class="filters">
       <input v-model="search" placeholder="Cerca Player/Clan/Eroe..." />
       <template v-if="activeTab === 'eroi'">
-        <Dropdown v-model="classe" :options="classeOptions" placeholder="Classe" class="dropdown-filter" 
-          :panelStyleClass="'green-dropdown-panel'"
-          :emptyMessage="''"
-          :emptyMessageTemplate="emptyMessageTemplate"
-          :pt="{
-            root: { style: 'background-color: #09351e; border: none;' },
-            label: { style: 'color: white; background-color: #09351e;' },
-            trigger: { style: 'color: white; background-color: #09351e;' },
-            panel: { style: 'background-color: #09351e; color: white;' },
-            emptyMessage: { style: 'background-color: #09351e; color: white;' }
-          }" />
-        <Dropdown v-model="mappa" :options="mappaOptions" placeholder="Mappe" class="dropdown-filter"
-          :panelStyleClass="'green-dropdown-panel'"
-          :emptyMessage="''"
-          :emptyMessageTemplate="emptyMessageTemplate"
-          :pt="{
-            root: { style: 'background-color: #09351e; border: none;' },
-            label: { style: 'color: white; background-color: #09351e;' },
-            trigger: { style: 'color: white; background-color: #09351e;' },
-            panel: { style: 'background-color: #09351e; color: white;' },
-            emptyMessage: { style: 'background-color: #09351e; color: white;' }
-          }" />
-        <Dropdown v-model="rank" :options="rankOptions" placeholder="Rank" class="dropdown-filter" 
-          :panelStyleClass="'green-dropdown-panel'"
-          :emptyMessage="''"
-          :emptyMessageTemplate="emptyMessageTemplate"
-          :pt="{
-            root: { style: 'background-color: #09351e; border: none;' },
-            label: { style: 'color: white; background-color: #09351e;' },
-            trigger: { style: 'color: white; background-color: #09351e;' },
-            panel: { style: 'background-color: #09351e; color: white;' },
-            emptyMessage: { style: 'background-color: #09351e; color: white;' }
-          }" />
+        <Dropdown v-model="classe" :options="classeOptions" placeholder="Classe" class="p-dropdown-green" />
+        <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Mappe" class="p-dropdown-green" />
+        <Dropdown v-model="rank" :options="rankOptions" optionLabel="name" optionValue="value" placeholder="Rank" class="p-dropdown-green" />
       </template>
       <template v-else-if="activeTab === 'player'">
-        <Dropdown v-model="modalita" :options="modalitaOptions" placeholder="Modalità" class="dropdown-filter" 
-          :panelStyleClass="'green-dropdown-panel'"
-          :emptyMessage="''"
-          :emptyMessageTemplate="emptyMessageTemplate"
-          :pt="{
-            root: { style: 'background-color: #09351e; border: none;' },
-            label: { style: 'color: white; background-color: #09351e;' },
-            trigger: { style: 'color: white; background-color: #09351e;' },
-            panel: { style: 'background-color: #09351e; color: white;' },
-            emptyMessage: { style: 'background-color: #09351e; color: white;' }
-          }" />
-        <Dropdown v-model="mappa" :options="mappaOptions" placeholder="Mappe" class="dropdown-filter" 
-          :panelStyleClass="'green-dropdown-panel'"
-          :emptyMessage="''"
-          :emptyMessageTemplate="emptyMessageTemplate"
-          :pt="{
-            root: { style: 'background-color: #09351e; border: none;' },
-            label: { style: 'color: white; background-color: #09351e;' },
-            trigger: { style: 'color: white; background-color: #09351e;' },
-            panel: { style: 'background-color: #09351e; color: white;' },
-            emptyMessage: { style: 'background-color: #09351e; color: white;' }
-          }" />
-        <Dropdown v-model="rank" :options="rankOptions" placeholder="Rank" class="dropdown-filter" 
-          :panelStyleClass="'green-dropdown-panel'"
-          :emptyMessage="''"
-          :emptyMessageTemplate="emptyMessageTemplate"
-          :pt="{
-            root: { style: 'background-color: #09351e; border: none;' },
-            label: { style: 'color: white; background-color: #09351e;' },
-            trigger: { style: 'color: white; background-color: #09351e;' },
-            panel: { style: 'background-color: #09351e; color: white;' },
-            emptyMessage: { style: 'background-color: #09351e; color: white;' }
-          }" />
+        <Dropdown v-model="modalita" :options="modalitaOptions" optionLabel="name" optionValue="value" placeholder="Modalità" class="p-dropdown-green" />
+        <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Mappe" class="p-dropdown-green" />
+        <Dropdown v-model="rank" :options="rankOptions" optionLabel="name" optionValue="value" placeholder="Rank" class="p-dropdown-green" />
       </template>
     </div>
     <div class="table-container">
@@ -112,25 +52,33 @@
           </template>
         </Column>
       </DataTable>
-      <DataTable v-else-if="activeTab === 'player'" :value="players">
+      <DataTable v-else-if="activeTab === 'player'" :value="filteredPlayers">
         <Column field="posizione" header="Posizione">
           <template #body="slotProps">
             {{ slotProps.index + 1 }}
           </template>
         </Column>
-        <Column field="username" header="Player" :sortable="true">
+        <Column field="pla_username" header="Player" :sortable="true">
           <template #body="slotProps">
-            <RouterLink :to="`/player/${slotProps.data.username}`" class="nav-btn">{{ slotProps.data.username }}</RouterLink>
+            <router-link :to="`/player/${slotProps.data.pla_id}`">{{ slotProps.data.pla_username }}</router-link>
           </template>
         </Column>
         <Column field="kd" header="KD" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.kd }}
+            {{
+              slotProps.data.morti > 0
+                ? (slotProps.data.uccisioni / slotProps.data.morti).toFixed(2)
+                : slotProps.data.uccisioni
+            }}
           </template>
         </Column>
         <Column field="winrate" header="%Vittorie" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.winrate }}
+            {{
+              slotProps.data.partite_giocate > 0
+                ? ((slotProps.data.vittorie / slotProps.data.partite_giocate) * 100).toFixed(1) + '%'
+                : '0%'
+            }}
           </template>
         </Column>
         <Column field="danni" header="%Danni" :sortable="true">
@@ -183,23 +131,62 @@
 <script setup>
 import { Column, DataTable } from 'primevue'
 import Dropdown from 'primevue/dropdown'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 const activeTab = ref('eroi')
 
 const eroi = ref([])
 const players = ref([])
 const clans = ref([])
+const mappe = ref([])
+const ranks = ref([])
 
 const classe = ref(null)
-const mappa = ref(null)
-const rank = ref(null)
-const modalita = ref(null)
+const mappa = ref('')
+const rank = ref('')
+const modalita = ref('')
+const search = ref('')
 
-const classeOptions = []
-const mappaOptions = []
-const rankOptions = []
-const modalitaOptions = []
+const modalitaList = ref([])
+
+const modalitaDisponibili = computed(() => {
+  const set = new Set()
+  if (players.value) {
+    players.value.forEach(p => p.modalita && set.add(p.modalita))
+  }
+  return Array.from(set)
+})
+const mappaDisponibili = computed(() => {
+  const set = new Set()
+  if (players.value) {
+    players.value.forEach(p => p.mappa && set.add(p.mappa))
+  }
+  return Array.from(set)
+})
+const rankDisponibili = computed(() => {
+  const set = new Set()
+  if (players.value) {
+    players.value.forEach(p => p.rank && set.add(p.rank))
+  }
+  return Array.from(set)
+})
+const modalitaOptions = computed(() => {
+  const options = modalitaList.value.map(m => ({ name: m.mod_nome, value: m.mod_nome }))
+  options.unshift({ name: 'Tutte le modalità', value: '' })
+  return options
+})
+const mappaOptions = computed(() => {
+  const options = mappe.value.map(m => ({ name: m.map_nome, value: m.map_nome }))
+  options.unshift({ name: 'Tutte le mappe', value: '' })
+  return options
+})
+const rankOptions = computed(() => {
+  const options = ranks.value.map(r => ({ name: r.ran_nome, value: r.ran_nome }))
+  options.unshift({ name: 'Tutti i rank', value: '' })
+  return options
+})
+
+const filteredPlayers = ref([])
 
 async function getStatsPlayer(){
   const res = await fetch('http://localhost/BigBlackDeath/backend/Player/getStatsPlayer.php')
@@ -211,19 +198,54 @@ async function getStatsClan(){
   clans.value = await res.json()
 }
 
-const setTab = (tab) => { activeTab.value = tab }
+async function fetchMappe() {
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Mappe/getMappe.php')
+  mappe.value = await res.json()
+}
+
+async function fetchModalita() {
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Modalita/getModalita.php')
+  modalitaList.value = await res.json()
+}
+
+async function fetchRanks() {
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Ranks/getRanks.php')
+  ranks.value = await res.json()
+}
+
+async function fetchFilteredPlayers() {
+  if (activeTab.value !== 'player') return;
+  const params = new URLSearchParams()
+  if (modalita.value) params.append('modalita', modalita.value)
+  if (mappa.value) params.append('mappa', mappa.value)
+  if (rank.value) params.append('rank', rank.value)
+  const res = await fetch(`http://localhost/BigBlackDeath/backend/Player/getFilteredStatsPlayer.php?${params.toString()}`)
+  filteredPlayers.value = await res.json()
+}
+
+watch([modalita, mappa, rank, activeTab], fetchFilteredPlayers, { immediate: true })
+
+const setTab = (tab) => {
+  activeTab.value = tab
+  // Reset filtri quando cambio tab
+  search.value = ''
+  modalita.value = ''
+  mappa.value = ''
+  rank.value = ''
+  classe.value = null
+}
 
 onMounted(() => {
   getStatsPlayer()
   getStatsClan()
+  fetchMappe()
+  fetchModalita()
+  fetchRanks()
 })
 
 // Filtri (esempio base, puoi aggiungere altri filtri)
 const filteredEroi = computed(() =>
   eroi.value.filter(e => e.eroe?.toLowerCase().includes(search.value.toLowerCase()))
-)
-const filteredPlayers = computed(() =>
-  players.value.filter(p => p.player?.toLowerCase().includes(search.value.toLowerCase()))
 )
 const filteredClans = computed(() =>
   clans.value.filter(c => c.clan?.toLowerCase().includes(search.value.toLowerCase()))
@@ -355,5 +377,39 @@ th { background: #09351e; }
 :deep(.green-dropdown-panel *) {
   background-color: #09351e !important;
   color: white !important;
+}
+
+.p-dropdown-green {
+  width: 220px;
+  max-width: 100%;
+  padding: 0;
+  border-radius: 10px;
+  border: none;
+  background: #09351e;
+  color: #fff;
+  font-size: 1.1rem;
+}
+:deep(.p-dropdown-green .p-dropdown-label) {
+  padding: 0.7rem 1.2rem;
+  color: #fff;
+  background: #09351e;
+}
+:deep(.p-dropdown-green .p-dropdown-trigger) {
+  background: #09351e;
+  color: #fff;
+}
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper) {
+  background: #09351e;
+}
+:deep(.p-dropdown-panel .p-dropdown-item) {
+  color: #fff;
+  background: #09351e;
+}
+:deep(.p-dropdown-panel .p-dropdown-item:hover) {
+  background: #145c3a;
+}
+:deep(.p-dropdown-panel .p-dropdown-empty-message) {
+  background: #09351e;
+  color: #fff;
 }
 </style>

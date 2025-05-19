@@ -3,14 +3,8 @@
     <h1>Eroi</h1>
     <div class="filters">
       <input v-model="search" placeholder="Cerca Player/Clan/Eroe..." />
-      <select v-model="classe">
-        <option value="">Tutte le classi</option>
-        <option v-for="c in classiDisponibili" :key="c" :value="c">{{ c }}</option>
-      </select>
-      <select v-model="difficolta">
-        <option value="">Tutte le difficoltà</option>
-        <option v-for="d in difficoltaDisponibili" :key="d" :value="d">{{ d }}</option>
-      </select>
+      <Dropdown v-model="classe" :options="classeOptionsDropdown" optionLabel="name" optionValue="value" placeholder="Tutte le classi" class="p-dropdown-green" />
+      <Dropdown v-model="difficolta" :options="difficoltaOptionsDropdown" optionLabel="name" optionValue="value" placeholder="Tutte le difficoltà" class="p-dropdown-green" />
     </div>
     <div class="heroes-grid">
       <div v-for="hero in filteredHeroes" :key="hero.id" class="hero-card">
@@ -26,6 +20,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import Dropdown from 'primevue/dropdown'
 
 const search = ref('')
 const classe = ref('')
@@ -44,6 +39,9 @@ const difficoltaDisponibili = computed(() => {
   heroes.value.forEach(h => h.difficolta && set.add(h.difficolta))
   return Array.from(set)
 })
+
+const classeOptionsDropdown = computed(() => [{ name: 'Tutte le classi', value: '' }, ...classiDisponibili.value.map(c => ({ name: c, value: c }))])
+const difficoltaOptionsDropdown = computed(() => [{ name: 'Tutte le difficoltà', value: '' }, ...difficoltaDisponibili.value.map(d => ({ name: d, value: d }))])
 
 // Fetch dati eroi da PHP
 const fetchHeroes = async () => {
@@ -140,6 +138,39 @@ h1 {
 }
 .hero-card-img span {
   font-size: 2rem;
+  color: #fff;
+}
+.p-dropdown-green {
+  width: 220px;
+  max-width: 100%;
+  padding: 0;
+  border-radius: 10px;
+  border: none;
+  background: #09351e;
+  color: #fff;
+  font-size: 1.1rem;
+}
+:deep(.p-dropdown-green .p-dropdown-label) {
+  padding: 0.7rem 1.2rem;
+  color: #fff;
+  background: #09351e;
+}
+:deep(.p-dropdown-green .p-dropdown-trigger) {
+  background: #09351e;
+  color: #fff;
+}
+:deep(.p-dropdown-panel .p-dropdown-items-wrapper) {
+  background: #09351e;
+}
+:deep(.p-dropdown-panel .p-dropdown-item) {
+  color: #fff;
+  background: #09351e;
+}
+:deep(.p-dropdown-panel .p-dropdown-item:hover) {
+  background: #145c3a;
+}
+:deep(.p-dropdown-panel .p-dropdown-empty-message) {
+  background: #09351e;
   color: #fff;
 }
 </style>

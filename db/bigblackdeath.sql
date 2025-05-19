@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Mag 16, 2025 alle 13:17
+-- Creato il: Mag 19, 2025 alle 13:35
 -- Versione del server: 10.4.27-MariaDB
 -- Versione PHP: 8.2.0
 
@@ -565,13 +565,13 @@ CREATE TABLE `ranks` (
 --
 
 INSERT INTO `ranks` (`ran_id`, `ran_nome`, `ran_min`, `ran_max`, `ran_image`) VALUES
-(1, 'Bronzo', 0, 999, ''),
-(2, 'Argento', 1000, 1999, ''),
-(3, 'Oro', 2000, 2999, ''),
-(4, 'Platino', 3000, 3999, ''),
-(5, 'Diamante', 4000, 4999, ''),
-(6, 'Maestro', 5000, 5999, ''),
-(7, 'Gran Maestro', 6000, 9999, '');
+(1, 'Bronzo', 0, 999, '\\images\\ranks\\bronzo.jpeg'),
+(2, 'Argento', 1000, 1999, '\\images\\ranks\\argento.jpg'),
+(3, 'Oro', 2000, 2999, '\\images\\ranks\\oro.jpeg'),
+(4, 'Platino', 3000, 3999, '\\images\\ranks\\platino.jpg'),
+(5, 'Diamante', 4000, 4999, '\\images\\ranks\\diamante.jpeg'),
+(6, 'Maestro', 5000, 5999, '\\images\\ranks\\maestro.jpeg'),
+(7, 'Gran Maestro', 6000, 9999, '\\images\\ranks\\grande_maestro.jpeg');
 
 -- --------------------------------------------------------
 
