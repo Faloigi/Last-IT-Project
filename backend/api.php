@@ -11,3 +11,11 @@ if (isset($data['message'])) {
 } else {
   echo json_encode(['status' => 'error', 'message' => 'No message received']);
 }
+
+if (isset($_GET['action'])) {
+    switch ($_GET['action']) {
+        case 'getStatsHero':
+            echo json_encode(getStatsHero());
+            break;
+    }
+}

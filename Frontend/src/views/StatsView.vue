@@ -9,7 +9,7 @@
     <div class="filters">
       <input v-model="search" placeholder="Cerca Player/Clan/Eroe..." />
       <template v-if="activeTab === 'eroi'">
-        <Dropdown v-model="classe" :options="classeOptions" placeholder="Classe" class="p-dropdown-green" />
+        <Dropdown v-model="classe" :options="classeOptions" optionLabel="name" optionValue="value" placeholder="Classe" class="p-dropdown-green" />
         <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Mappe" class="p-dropdown-green" />
         <Dropdown v-model="rank" :options="rankOptions" optionLabel="name" optionValue="value" placeholder="Rank" class="p-dropdown-green" />
       </template>
@@ -20,15 +20,25 @@
       </template>
     </div>
     <div class="table-container">
-      <DataTable v-if="activeTab === 'eroi'" :value="eroi">
+      <DataTable v-if="activeTab === 'eroi'" :value="filteredEroi">
         <Column field="posizione" header="Posizione" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.posizione }}
+            {{ slotProps.index + 1 }}
           </template>
         </Column>
         <Column field="eroe" header="Eroe" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.eroe }}
+            <router-link :to="`/eroe/${slotProps.data.eroe}`">{{ slotProps.data.eroe }}</router-link>
+          </template>
+        </Column>
+        <Column field="classe" header="Classe" :sortable="true">
+          <template #body="slotProps">
+            {{ slotProps.data.classe }}
+          </template>
+        </Column>
+        <Column field="difficolta" header="Difficoltà" :sortable="true">
+          <template #body="slotProps">
+            {{ slotProps.data.difficolta }}
           </template>
         </Column>
         <Column field="kd" header="KD" :sortable="true">
@@ -38,12 +48,12 @@
         </Column>
         <Column field="vittorie" header="%Vittorie" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.vittorie }}
+            {{ slotProps.data.vittorie }}%
           </template>
         </Column>
         <Column field="scelta" header="%Scelta" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.scelta }}
+            {{ slotProps.data.scelta }}%
           </template>
         </Column>
         <Column field="partite" header="Partite" :sortable="true">
@@ -58,32 +68,24 @@
             {{ slotProps.index + 1 }}
           </template>
         </Column>
-        <Column field="pla_username" header="Player" :sortable="true">
+        <Column field="username" header="Player" :sortable="true">
           <template #body="slotProps">
-            <router-link :to="`/player/${slotProps.data.pla_id}`">{{ slotProps.data.pla_username }}</router-link>
+            <router-link :to="`/player/${slotProps.data.username}`">{{ slotProps.data.username }}</router-link>
           </template>
         </Column>
         <Column field="kd" header="KD" :sortable="true">
           <template #body="slotProps">
-            {{
-              slotProps.data.morti > 0
-                ? (slotProps.data.uccisioni / slotProps.data.morti).toFixed(2)
-                : slotProps.data.uccisioni
-            }}
+            {{ slotProps.data.kd !== undefined ? Number(slotProps.data.kd).toFixed(2) : '-' }}
           </template>
         </Column>
         <Column field="winrate" header="%Vittorie" :sortable="true">
           <template #body="slotProps">
-            {{
-              slotProps.data.partite_giocate > 0
-                ? ((slotProps.data.vittorie / slotProps.data.partite_giocate) * 100).toFixed(1) + '%'
-                : '0%'
-            }}
+            {{ slotProps.data.winrate !== undefined ? Number(slotProps.data.winrate).toFixed(1) + '%' : '-' }}
           </template>
         </Column>
-        <Column field="danni" header="%Danni" :sortable="true">
+        <Column field="danni" header="Danni" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.danni }}
+            {{ slotProps.data.danni !== undefined ? Number(slotProps.data.danni).toFixed(2) : '-' }}
           </template>
         </Column>
         <Column field="partite_giocate" header="Partite" :sortable="true">
@@ -186,7 +188,13 @@ const rankOptions = computed(() => {
   return options
 })
 
-const filteredPlayers = ref([])
+const filteredPlayers = computed(() => {
+  let filtered = players.value
+  if (activeTab.value === 'player' && search.value) filtered = filtered.filter(p => p.username?.toLowerCase().includes(search.value.toLowerCase()))
+  return filtered
+})
+
+const classeOptions = ref([{ name: 'Tutte le classi', value: '' }])
 
 async function getStatsPlayer(){
   const res = await fetch('http://localhost/BigBlackDeath/backend/Player/getStatsPlayer.php')
@@ -213,6 +221,12 @@ async function fetchRanks() {
   ranks.value = await res.json()
 }
 
+async function fetchClassi() {
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Hero/getClassi.php')
+  const data = await res.json()
+  classeOptions.value = [{ name: 'Tutte le classi', value: '' }, ...data.map(c => ({ name: c.cla_nome, value: c.cla_nome }))]
+}
+
 async function fetchFilteredPlayers() {
   if (activeTab.value !== 'player') return;
   const params = new URLSearchParams()
@@ -223,7 +237,20 @@ async function fetchFilteredPlayers() {
   filteredPlayers.value = await res.json()
 }
 
-watch([modalita, mappa, rank, activeTab], fetchFilteredPlayers, { immediate: true })
+async function fetchStatsHero() {
+  const params = new URLSearchParams()
+  if (classe.value) params.append('classe', classe.value)
+  if (mappa.value) params.append('mappa', mappa.value)
+  if (rank.value) params.append('rank', rank.value)
+  // NB: questi filtri sono placeholder, l'endpoint attuale non li supporta ancora
+  const res = await fetch(`http://localhost/BigBlackDeath/backend/Hero/getStatsHero.php?${params.toString()}`)
+  eroi.value = await res.json()
+}
+
+watch([classe, mappa, rank, activeTab], () => {
+  if (activeTab.value === 'eroi') fetchStatsHero()
+  if (activeTab.value === 'player') fetchFilteredPlayers()
+}, { immediate: true })
 
 const setTab = (tab) => {
   activeTab.value = tab
@@ -241,15 +268,30 @@ onMounted(() => {
   fetchMappe()
   fetchModalita()
   fetchRanks()
+  fetchStatsHero()
+  fetchClassi()
 })
 
-// Filtri (esempio base, puoi aggiungere altri filtri)
-const filteredEroi = computed(() =>
-  eroi.value.filter(e => e.eroe?.toLowerCase().includes(search.value.toLowerCase()))
-)
-const filteredClans = computed(() =>
-  clans.value.filter(c => c.clan?.toLowerCase().includes(search.value.toLowerCase()))
-)
+// Rendo la searchbar contestuale
+const filteredEroi = computed(() => {
+  let filtered = eroi.value
+  if (classe.value) filtered = filtered.filter(e => e.classe === classe.value)
+  if (mappa.value) filtered = filtered.filter(e => e.mappa === mappa.value)
+  if (rank.value) filtered = filtered.filter(e => e.rank === rank.value)
+  if (activeTab.value === 'eroi' && search.value) filtered = filtered.filter(e => e.eroe?.toLowerCase().includes(search.value.toLowerCase()))
+  if (classe.value || mappa.value || rank.value) {
+    filtered = [...filtered].sort((a, b) => b.vittorie - a.vittorie)
+  } else {
+    filtered = [...filtered].sort((a, b) => b.partite - a.partite)
+  }
+  return filtered
+})
+
+const filteredClans = computed(() => {
+  let filtered = clans.value
+  if (activeTab.value === 'clan' && search.value) filtered = filtered.filter(c => c.nome?.toLowerCase().includes(search.value.toLowerCase()))
+  return filtered
+})
 
 const activeTabLabel = computed(() => {
   if (activeTab.value === 'eroi') return 'Eroi'

@@ -1,56 +1,66 @@
 <template>
   <div class="player-container">
     <h1>{{ username }}</h1>
-    <div class="player-layout">
-      <!-- Colonna sinistra -->
-      <div class="player-sidebar">
-        <div class="rank-btn">
-          <img v-if="player.rank_img" :src="player.rank_img" class="rank-img" />
-          <span v-else>{{ player.rank || 'Rank' }}</span>
-        </div>
-        <div class="heroes-played">
-          <div class="sidebar-title">Eroi Giocati</div>
-          <div v-for="hero in player.heroesPlayed" :key="hero.id" class="hero-played-card">
-            <span>{{ hero.nome || hero.name || 'Eroe' }}</span>
+    <div v-if="fetchError" class="error-message">
+      Player non trovato o errore di rete.
+    </div>
+    <div v-else-if="player">
+      <div class="player-layout">
+        <!-- Colonna sinistra -->
+        <div class="player-sidebar">
+          <div class="rank-btn">
+            <img v-if="player.rank_img" :src="player.rank_img" class="rank-img" />
+            <span v-else>{{ player.rank || 'Rank' }}</span>
           </div>
-        </div>
-      </div>
-      <!-- Colonna centrale -->
-      <div class="player-main">
-        <div class="main-title">Partite Giocate</div>
-        <div v-for="match in filteredMatches" :key="match.par_id" class="match-card-opgg" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
-          <!-- Immagine eroe giocato -->
-          <div class="match-hero-img">
-            <img v-if="match.eroe_img" :src="match.eroe_img" :alt="match.eroe" />
-            <div v-else class="img-placeholder">{{ match.eroe?.charAt(0) }}</div>
-          </div>
-          <!-- Centro: risultato, KDA, dettagli -->
-          <div class="match-center">
-            <div class="match-result" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
-              {{ match.risultato === 'Vinto' ? 'Vittoria' : 'Sconfitta' }}
+          <div class="heroes-played">
+            <div class="sidebar-title">Eroi Giocati</div>
+            <div v-for="hero in player.heroesPlayed" :key="hero.ero_id" class="hero-played-card">
+              <span>{{ hero.nome || hero.name || 'Eroe' }}</span>
             </div>
-            <div class="match-kd">
-              {{ (match.morti && match.morti > 0) ? (match.uccisioni / match.morti).toFixed(1) : match.uccisioni }}
-              <span class="kd-label">K/D</span>
-            </div>
-            <div class="match-kd-details">
-              {{ match.uccisioni }}/{{ match.morti }}
-            </div>
-            <div class="match-meta">
-              <span>{{ match.modalita }}</span> - <span>{{ match.mappa }}</span> <span v-if="match.data">- {{ new Date(match.data).toLocaleDateString() }}</span>
-            </div>
-          </div>
-          <!-- Lista partecipanti -->
-          <div class="match-players">
-            <div v-for="p in match.partecipanti" :key="p" class="player-name" :class="{ highlight: p === player.username }">{{ p }}</div>
           </div>
         </div>
-      </div>
-      <!-- Colonna destra -->
-      <div class="player-filters">
-        <input v-model="searchHero" placeholder="Cerca per Eroe" />
-        <Dropdown v-model="modalita" :options="modalitaOptions" optionLabel="name" optionValue="value" placeholder="Tutte le modalità" class="p-dropdown-green" />
-        <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Tutte le mappe" class="p-dropdown-green" />
+        <!-- Colonna centrale -->
+        <div class="player-main">
+          <div class="main-title">Partite Giocate</div>
+          <div v-if="filteredMatches.length === 0" class="no-matches">
+            Nessuna partita trovata con i filtri attuali.
+          </div>
+          <div v-else>
+            <div v-for="match in filteredMatches" :key="match.par_id" class="match-card-opgg" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
+              <!-- Immagine eroe giocato -->
+              <div class="match-hero-img">
+                <img v-if="match.eroe_img" :src="match.eroe_img" :alt="match.eroe" />
+                <div v-else class="img-placeholder">{{ match.eroe?.charAt(0) }}</div>
+              </div>
+              <!-- Centro: risultato, KDA, dettagli -->
+              <div class="match-center">
+                <div class="match-result" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
+                  {{ match.risultato === 'Vinto' ? 'Vittoria' : 'Sconfitta' }}
+                </div>
+                <div class="match-kd">
+                  {{ (match.morti && match.morti > 0) ? (match.uccisioni / match.morti).toFixed(1) : match.uccisioni }}
+                  <span class="kd-label">K/D</span>
+                </div>
+                <div class="match-kd-details">
+                  {{ match.uccisioni }}/{{ match.morti }}
+                </div>
+                <div class="match-meta">
+                  <span>{{ match.modalita }}</span> - <span>{{ match.mappa }}</span> <span v-if="match.data">- {{ new Date(match.data).toLocaleDateString() }}</span>
+                </div>
+              </div>
+              <!-- Lista partecipanti -->
+              <div class="match-players">
+                <div v-for="p in match.partecipanti" :key="p" class="player-name" :class="{ highlight: p === player.username }">{{ p }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Colonna destra -->
+        <div class="player-filters">
+          <input v-model="searchHero" placeholder="Cerca per Eroe" />
+          <Dropdown v-model="modalita" :options="modalitaOptions" optionLabel="name" optionValue="value" placeholder="Tutte le modalità" class="p-dropdown-green" />
+          <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Tutte le mappe" class="p-dropdown-green" />
+        </div>
       </div>
     </div>
   </div>
@@ -61,16 +71,11 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Dropdown from 'primevue/dropdown'
 
-// Variabili per i dati del player
-const player = ref({
-  rank: '',
-  heroesPlayed: [],
-  matches: []
-})
+const player = ref(null)
+const fetchError = ref(false)
 const route = useRoute()
-const username = computed(() => route.params.username || 'Player')
+const username = computed(() => route.params.username || '')
 
-// Variabili per i filtri
 const searchHero = ref('')
 const modalita = ref('')
 const mappa = ref('')
@@ -83,14 +88,20 @@ const emptyMessageTemplate = (options) => {
   }
 }
 
-// Fetch dati player da PHP
 async function getPlayerData() {
+  fetchError.value = false
   try {
     const res = await fetch('http://localhost/BigBlackDeath/backend/Player/getPlayerData.php?username=' + username.value)
-    player.value = await res.json()
+    const data = await res.json()
+    if (!data || !data.username) {
+      fetchError.value = true
+      player.value = null
+    } else {
+      player.value = data
+    }
   } catch (e) {
-    console.error('Errore nel caricamento dei dati:', e)
-    player.value = { rank: '', heroesPlayed: [], matches: [] }
+    fetchError.value = true
+    player.value = null
   }
 }
 
@@ -127,8 +138,7 @@ const mappaOptions = computed(() => {
 
 // Filtra le partite in base ai filtri selezionati
 const filteredMatches = computed(() => {
-  if (!player.value.matches) return []
-
+  if (!player.value || !player.value.matches) return []
   return player.value.matches.filter(match =>
     (!searchHero.value || match.eroe?.toLowerCase().includes(searchHero.value.toLowerCase())) &&
     (!modalita.value || match.modalita === modalita.value) &&

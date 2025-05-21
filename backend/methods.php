@@ -129,3 +129,171 @@ function getStatsClan(){
     $result = $conn->query($query);
     return $result->fetch_all(MYSQLI_ASSOC);
 }
+
+function getFilteredStatsPlayer($modalita = null, $mappa = null, $rank = null) {
+    global $conn;
+    $sql = "
+    SELECT
+      p.pla_id,
+      p.pla_username,
+      p.pla_mmr,
+      r.ran_nome AS rank,
+      COUNT(pa.ptr_id) AS partite_giocate,
+      SUM(pa.ptr_uccisioni) AS uccisioni,
+      SUM(pa.ptr_morti) AS morti,
+      SUM(pa.ptr_danni) AS danni,
+      SUM(pa.ptr_risultato = 'Vinto') AS vittorie
+    FROM players p
+    JOIN ranks r ON p.pla_ran_id = r.ran_id
+    JOIN partecipazioni pa ON pa.ptr_pla_id = p.pla_id
+    JOIN partite par ON pa.ptr_par_id = par.par_id
+    JOIN modalita m ON par.par_mod_id = m.mod_id
+    JOIN mappe ma ON par.par_map_id = ma.map_id
+    WHERE 1
+    ";
+    $params = [];
+    $types = '';
+    if ($modalita) {
+      $sql .= " AND m.mod_nome = ? ";
+      $params[] = $modalita;
+      $types .= 's';
+    }
+    if ($mappa) {
+      $sql .= " AND ma.map_nome = ? ";
+      $params[] = $mappa;
+      $types .= 's';
+    }
+    if ($rank) {
+      $sql .= " AND r.ran_nome = ? ";
+      $params[] = $rank;
+      $types .= 's';
+    }
+    $sql .= " GROUP BY p.pla_id ORDER BY p.pla_mmr DESC ";
+    $stmt = $conn->prepare($sql);
+    if ($params) {
+      $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $players = [];
+    while($row = $res->fetch_assoc()) {
+        $players[] = $row;
+    }
+    return $players;
+}
+
+function getMappe() {
+    global $conn;
+    $sql = "SELECT map_id, map_nome, map_image FROM mappe";
+    $res = $conn->query($sql);
+    $mappe = [];
+    while($row = $res->fetch_assoc()) {
+        $mappe[] = $row;
+    }
+    return $mappe;
+}
+
+function getModalita() {
+    global $conn;
+    $sql = "SELECT mod_id, mod_nome FROM modalita";
+    $res = $conn->query($sql);
+    $modalita = [];
+    while($row = $res->fetch_assoc()) {
+        $modalita[] = $row;
+    }
+    return $modalita;
+}
+
+function getRanks() {
+    global $conn;
+    $sql = "SELECT ran_id, ran_nome, ran_image FROM ranks";
+    $res = $conn->query($sql);
+    $ranks = [];
+    while($row = $res->fetch_assoc()) {
+        $ranks[] = $row;
+    }
+    return $ranks;
+}
+
+function getStatsHero($classe = null, $mappa = null, $rank = null) {
+    global $conn;
+    $where = [];
+    $params = [];
+    $types = '';
+    if ($classe) {
+        $where[] = 'c.cla_nome = ?';
+        $params[] = $classe;
+        $types .= 's';
+    }
+    if ($mappa) {
+        $where[] = 'mp.map_nome = ?';
+        $params[] = $mappa;
+        $types .= 's';
+    }
+    if ($rank) {
+        $where[] = 'r.ran_nome = ?';
+        $params[] = $rank;
+        $types .= 's';
+    }
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    // Query principale: aggrega solo sulle partite che rispettano i filtri
+    $query = "SELECT 
+        e.ero_nome as eroe,
+        c.cla_nome as classe,
+        e.ero_difficolta as difficolta,
+        e.ero_image as img,
+        ROUND(SUM(p.ptr_uccisioni)/NULLIF(SUM(p.ptr_morti),0), 2) as kd,
+        ROUND(SUM(CASE WHEN p.ptr_risultato = 'Vinto' THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) as vittorie,
+        COUNT(*) as partite
+    FROM partecipazioni p
+    JOIN eroi e ON p.ptr_ero_id = e.ero_id
+    LEFT JOIN classi c ON e.ero_cla_id = c.cla_id
+    LEFT JOIN partite par ON p.ptr_par_id = par.par_id
+    LEFT JOIN mappe mp ON par.par_map_id = mp.map_id
+    LEFT JOIN players pl ON p.ptr_pla_id = pl.pla_id
+    LEFT JOIN ranks r ON pl.pla_ran_id = r.ran_id
+    $whereSql
+    GROUP BY e.ero_id, e.ero_nome, c.cla_nome, e.ero_difficolta, e.ero_image
+    ORDER BY vittorie DESC, partite DESC";
+    $stmt = $conn->prepare($query);
+    if ($params) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $heroes = $result->fetch_all(MYSQLI_ASSOC);
+
+    // Calcola il totale delle partite filtrate (per % scelta)
+    $queryTot = "SELECT COUNT(*) as tot_partite
+        FROM partecipazioni p
+        LEFT JOIN eroi e ON p.ptr_ero_id = e.ero_id
+        LEFT JOIN classi c ON e.ero_cla_id = c.cla_id
+        LEFT JOIN partite par ON p.ptr_par_id = par.par_id
+        LEFT JOIN mappe mp ON par.par_map_id = mp.map_id
+        LEFT JOIN players pl ON p.ptr_pla_id = pl.pla_id
+        LEFT JOIN ranks r ON pl.pla_ran_id = r.ran_id
+        $whereSql";
+    $stmtTot = $conn->prepare($queryTot);
+    if ($params) $stmtTot->bind_param($types, ...$params);
+    $stmtTot->execute();
+    $resTot = $stmtTot->get_result();
+    $totPartite = $resTot->fetch_assoc()['tot_partite'] ?: 1;
+
+    // Aggiungi % scelta
+    foreach ($heroes as &$h) {
+        $h['scelta'] = round(($h['partite'] / $totPartite) * 100, 2);
+    }
+    return $heroes;
+}
+
+function getClassi() {
+    global $conn;
+    $sql = "SELECT cla_id, cla_nome FROM classi";
+    $res = $conn->query($sql);
+    $classi = [];
+    while($row = $res->fetch_assoc()) {
+        $classi[] = $row;
+    }
+    return $classi;
+}
