@@ -12,10 +12,10 @@
             <img v-if="player.rank_img" :src="player.rank_img" class="rank-img" />
             <span v-else>{{ player.rank || 'Rank' }}</span>
           </div>
-          <div class="heroes-played">
+          <div class="eroi-giocati">
             <div class="sidebar-title">Eroi Giocati</div>
-            <div v-for="hero in player.heroesPlayed" :key="hero.ero_id" class="hero-played-card">
-              <span>{{ hero.nome || hero.name || 'Eroe' }}</span>
+            <div v-for="eroe in player.eroiGiocati" :key="eroe.ero_id" class="eroe-giocato-card">
+              <span>{{ eroe.nome || eroe.name || 'Eroe' }}</span>
             </div>
           </div>
         </div>
@@ -26,33 +26,40 @@
             Nessuna partita trovata con i filtri attuali.
           </div>
           <div v-else>
-            <div v-for="match in filteredMatches" :key="match.par_id" class="match-card-opgg" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
-              <!-- Immagine eroe giocato -->
-              <div class="match-hero-img">
-                <img v-if="match.eroe_img" :src="match.eroe_img" :alt="match.eroe" />
-                <div v-else class="img-placeholder">{{ match.eroe?.charAt(0) }}</div>
+            <router-link
+              v-for="match in filteredMatches"
+              :key="match.par_id"
+              :to="`/partita/${match.par_id}`"
+              class="match-card-link"
+            >
+              <div class="match-card-opgg" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
+                <!-- Immagine eroe giocato -->
+                <div class="match-hero-img">
+                  <img v-if="match.eroe_img" :src="match.eroe_img" :alt="match.eroe" />
+                  <div v-else class="img-placeholder">{{ match.eroe?.charAt(0) }}</div>
+                </div>
+                <!-- Centro: risultato, KDA, dettagli -->
+                <div class="match-center">
+                  <div class="match-result" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
+                    {{ match.risultato === 'Vinto' ? 'Vittoria' : 'Sconfitta' }}
+                  </div>
+                  <div class="match-kd">
+                    {{ (match.morti && match.morti > 0) ? (match.uccisioni / match.morti).toFixed(1) : match.uccisioni }}
+                    <span class="kd-label">K/D</span>
+                  </div>
+                  <div class="match-kd-details">
+                    {{ match.uccisioni }}/{{ match.morti }}
+                  </div>
+                  <div class="match-meta">
+                    <span>{{ match.modalita }}</span> - <span>{{ match.mappa }}</span> <span v-if="match.data">- {{ new Date(match.data).toLocaleDateString() }}</span>
+                  </div>
+                </div>
+                <!-- Lista partecipanti -->
+                <div class="match-players">
+                  <div v-for="p in match.partecipanti" :key="p" class="player-name" :class="{ highlight: p === player.username }">{{ p }}</div>
+                </div>
               </div>
-              <!-- Centro: risultato, KDA, dettagli -->
-              <div class="match-center">
-                <div class="match-result" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
-                  {{ match.risultato === 'Vinto' ? 'Vittoria' : 'Sconfitta' }}
-                </div>
-                <div class="match-kd">
-                  {{ (match.morti && match.morti > 0) ? (match.uccisioni / match.morti).toFixed(1) : match.uccisioni }}
-                  <span class="kd-label">K/D</span>
-                </div>
-                <div class="match-kd-details">
-                  {{ match.uccisioni }}/{{ match.morti }}
-                </div>
-                <div class="match-meta">
-                  <span>{{ match.modalita }}</span> - <span>{{ match.mappa }}</span> <span v-if="match.data">- {{ new Date(match.data).toLocaleDateString() }}</span>
-                </div>
-              </div>
-              <!-- Lista partecipanti -->
-              <div class="match-players">
-                <div v-for="p in match.partecipanti" :key="p" class="player-name" :class="{ highlight: p === player.username }">{{ p }}</div>
-              </div>
-            </div>
+            </router-link>
           </div>
         </div>
         <!-- Colonna destra -->
@@ -208,7 +215,7 @@ h1 {
   display: block;
   margin: 0 auto;
 }
-.heroes-played {
+.eroi-giocati {
   background: #09351e;
   border-radius: 10px;
   padding: 1rem 0.5rem;
@@ -219,7 +226,7 @@ h1 {
   margin-bottom: 1rem;
   text-align: center;
 }
-.hero-played-card {
+.eroe-giocato-card {
   background: #0d2b1a;
   border-radius: 8px;
   margin: 0.5rem 0;
@@ -424,5 +431,15 @@ h1 {
   color: #b6e2c6;
   margin-left: 0.7rem;
   font-weight: 500;
+}
+
+.match-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: filter 0.15s;
+}
+.match-card-link:hover {
+  filter: brightness(1.15) drop-shadow(0 0 8px #19d86b88);
 }
 </style>

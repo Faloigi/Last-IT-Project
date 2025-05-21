@@ -57,7 +57,7 @@ function getPlayerData($username){
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $player['pla_id']);
     $stmt->execute();
-    $heroesPlayed = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $eroiGiocati = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     // Partite giocate (con lista giocatori e immagine eroe)
     $query = "SELECT par.par_id, par.par_inizio as data, m.mod_nome as modalita, mp.map_nome as mappa, e.ero_nome as eroe, e.ero_image as eroe_img, p.ptr_risultato as risultato, p.ptr_danni as danni, p.ptr_cure as cure, p.ptr_uccisioni as uccisioni, p.ptr_morti as morti
@@ -104,7 +104,7 @@ function getPlayerData($username){
         'mmr' => $player['pla_mmr'],
         'rank' => $rank ? $rank['ran_nome'] : null,
         'rank_img' => $rank ? $rank['ran_image'] : null,
-        'heroesPlayed' => $heroesPlayed,
+        'eroiGiocati' => $eroiGiocati,
         'matches' => $matches,
         'kd' => $stats['kd'],
         'winrate' => $stats['winrate'],
@@ -215,7 +215,7 @@ function getRanks() {
     return $ranks;
 }
 
-function getStatsHero($classe = null, $mappa = null, $rank = null) {
+function getStatsEroe($classe = null, $mappa = null, $rank = null) {
     global $conn;
     $where = [];
     $params = [];
@@ -262,7 +262,7 @@ function getStatsHero($classe = null, $mappa = null, $rank = null) {
     }
     $stmt->execute();
     $result = $stmt->get_result();
-    $heroes = $result->fetch_all(MYSQLI_ASSOC);
+    $eroi = $result->fetch_all(MYSQLI_ASSOC);
 
     // Calcola il totale delle partite filtrate (per % scelta)
     $queryTot = "SELECT COUNT(*) as tot_partite
@@ -281,10 +281,10 @@ function getStatsHero($classe = null, $mappa = null, $rank = null) {
     $totPartite = $resTot->fetch_assoc()['tot_partite'] ?: 1;
 
     // Aggiungi % scelta
-    foreach ($heroes as &$h) {
+    foreach ($eroi as &$h) {
         $h['scelta'] = round(($h['partite'] / $totPartite) * 100, 2);
     }
-    return $heroes;
+    return $eroi;
 }
 
 function getClassi() {
@@ -296,4 +296,51 @@ function getClassi() {
         $classi[] = $row;
     }
     return $classi;
+}
+
+function getPartita($id) {
+    global $conn;
+    if (!$id) return null;
+    // Info partita
+    $query = "SELECT par_id, par_inizio as data, m.mod_nome as modalita, mp.map_nome as mappa FROM partite par LEFT JOIN modalita m ON par.par_mod_id = m.mod_id LEFT JOIN mappe mp ON par.par_map_id = mp.map_id WHERE par.par_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $partita = $stmt->get_result()->fetch_assoc();
+    if (!$partita) return null;
+    // Partecipanti
+    $query = "SELECT pl.pla_username as username, e.ero_nome as eroe, e.ero_image as eroe_img, p.ptr_uccisioni as uccisioni, p.ptr_morti as morti, p.ptr_danni as danni, p.ptr_cure as cure, p.ptr_risultato as risultato FROM partecipazioni p JOIN players pl ON p.ptr_pla_id = pl.pla_id LEFT JOIN eroi e ON p.ptr_ero_id = e.ero_id WHERE p.ptr_par_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $partecipanti = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $partita['partecipanti'] = $partecipanti;
+    return $partita;
+}
+
+function getEroe($nome) {
+    global $conn;
+    if (!$nome) return null;
+    // Info base eroe
+    $query = "SELECT e.ero_id, e.ero_nome as nome, c.cla_nome as classe, e.ero_difficolta as difficolta, e.ero_image as img FROM eroi e LEFT JOIN classi c ON e.ero_cla_id = c.cla_id WHERE e.ero_nome = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $nome);
+    $stmt->execute();
+    $eroe = $stmt->get_result()->fetch_assoc();
+    if (!$eroe) return null;
+    // Statistiche generali
+    $query = "SELECT COUNT(*) as partite, ROUND(SUM(p.ptr_uccisioni)/NULLIF(SUM(p.ptr_morti),0),1) as kd, ROUND(SUM(CASE WHEN p.ptr_risultato = 'Vinto' THEN 1 ELSE 0 END)/COUNT(*),2)*100 as vittorie, ROUND(AVG(p.ptr_danni),1) as danni FROM partecipazioni p JOIN eroi e ON p.ptr_ero_id = e.ero_id WHERE e.ero_nome = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $nome);
+    $stmt->execute();
+    $stats = $stmt->get_result()->fetch_assoc();
+    $eroe = array_merge($eroe, $stats);
+    // Migliori partite (top 10 danni)
+    $query = "SELECT par.par_id, pl.pla_username as username, par.par_inizio as data, m.mod_nome as modalita, mp.map_nome as mappa, p.ptr_uccisioni as uccisioni, p.ptr_morti as morti, p.ptr_danni as danni, p.ptr_cure as cure, p.ptr_risultato as risultato FROM partecipazioni p JOIN players pl ON p.ptr_pla_id = pl.pla_id JOIN partite par ON p.ptr_par_id = par.par_id LEFT JOIN modalita m ON par.par_mod_id = m.mod_id LEFT JOIN mappe mp ON par.par_map_id = mp.map_id JOIN eroi e ON p.ptr_ero_id = e.ero_id WHERE e.ero_nome = ? ORDER BY p.ptr_danni DESC LIMIT 10";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $nome);
+    $stmt->execute();
+    $matches = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $eroe['matches'] = $matches;
+    return $eroe;
 }

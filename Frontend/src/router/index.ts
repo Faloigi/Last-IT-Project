@@ -1,9 +1,10 @@
-import HeroesView from '@/views/HeroesView.vue'
+import EroiView from '@/views/EroiView.vue'
+import EroeView from '@/views/EroeView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import PlayerView from '@/views/PlayerView.vue'
 import StatsView from '@/views/StatsView.vue'
-import HeroView from '@/views/HeroView.vue'
+import PartitaView from '@/views/PartitaView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -25,9 +26,9 @@ const router = createRouter({
       component: StatsView
     },
     {
-      path: '/heroes',
-      name: 'heroes',
-      component: HeroesView
+      path: '/eroi',
+      name: 'eroi',
+      component: EroiView
     },
     {
       path: '/player/:username',
@@ -37,7 +38,12 @@ const router = createRouter({
     {
       path: '/eroe/:nome',
       name: 'eroe',
-      component: HeroView
+      component: EroeView
+    },
+    {
+      path: '/partita/:id',
+      name: 'partita',
+      component: PartitaView
     },
   ],
 })

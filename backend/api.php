@@ -14,8 +14,8 @@ if (isset($data['message'])) {
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
-        case 'getStatsHero':
-            echo json_encode(getStatsHero());
+        case 'getStatsEroe':
+            echo json_encode(getStatsEroe());
             break;
     }
 }

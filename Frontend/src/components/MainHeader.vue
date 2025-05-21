@@ -12,7 +12,7 @@ import { RouterLink } from 'vue-router';
     </div>
     <nav class="nav-buttons">
       <RouterLink to="/stats" class="nav-btn">Statistiche</RouterLink>
-      <RouterLink to="/heroes" class="nav-btn">Eroi</RouterLink>
+      <RouterLink to="/eroi" class="nav-btn">Eroi</RouterLink>
       <RouterLink to="/login" class="nav-btn">Login</RouterLink>
     </nav>
   </header>

@@ -243,7 +243,7 @@ async function fetchStatsHero() {
   if (mappa.value) params.append('mappa', mappa.value)
   if (rank.value) params.append('rank', rank.value)
   // NB: questi filtri sono placeholder, l'endpoint attuale non li supporta ancora
-  const res = await fetch(`http://localhost/BigBlackDeath/backend/Hero/getStatsHero.php?${params.toString()}`)
+  const res = await fetch(`http://localhost/BigBlackDeath/backend/Hero/getStatsEroe.php?${params.toString()}`)
   eroi.value = await res.json()
 }
 
