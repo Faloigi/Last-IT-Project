@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Mag 19, 2025 alle 13:35
--- Versione del server: 10.4.27-MariaDB
--- Versione PHP: 8.2.0
+-- Creato il: Mag 22, 2025 alle 16:16
+-- Versione del server: 10.4.32-MariaDB
+-- Versione PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -594,15 +594,15 @@ CREATE TABLE `utenti` (
 --
 
 INSERT INTO `utenti` (`ute_id`, `ute_username`, `ute_email`, `ute_password`, `ute_data_registrazione`, `ute_ruolo`, `ute_pla_id`) VALUES
-(1, 'ColpoOmbra', 'ombra@esempio.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', '2024-01-15 14:30:00', 'utente', 1),
-(2, 'ReginaGelo', 'gelo@esempio.com', '99bd803cac6eb5348c1253728ea88fcf820edad24ab31aac2b456caf82575330', '2023-11-22 09:15:00', 'utente', 2),
+(1, 'ColpoOmbra', 'ombra@esempio.com', '76a6a2079b7ece0d10f6081bf6ad0ce6034f070d1d5d7a9629fea56a0741a2aa', '2024-01-15 14:30:00', 'utente', 1),
+(2, 'ReginaGelo', 'gelo@esempio.com', '29d21d2a3cc746828e62e4fa5d829d3c8425978a09819c6f87bc50c9f51db2aa', '2023-11-22 09:15:00', 'utente', 2),
 (3, 'SterminaNoob', 'noob@esempio.com', '244071833db77587c870919e34054ac1af2e4a82f6b3e5352a799ceeec9d8368', '2024-03-05 18:45:00', 'utente', 3),
 (4, 'DioDeiTank', 'tank@esempio.com', '9fe7db6aad8050f7fbd6cc4694c4433debc25ebab6fcf5151f0f0c5f8be29af2', '2023-09-30 11:20:00', 'admin', 4),
 (5, 'CuraBot', 'cura@esempio.com', 'ff15a95205e8e4bd49f87bc8fb0ed3b5773291c3c1b4dde577b362e734a4a74e', '2024-02-14 16:10:00', 'utente', 5),
 (6, 'CecchinoPro', 'cecchino@esempio.com', 'e350fac44e983c50335e9f260592ddae0fb958a86e9c45ff25886b2df6909f4c', '2024-01-28 13:25:00', 'utente', 6),
 (7, 'SignoreFiamma', 'fiamma@esempio.com', '5ec74678da9c4a222189e25d0f3308f24bfe4f5ce150c12b9039278d05a89f70', '2023-12-10 20:05:00', 'utente', 7),
 (8, 'Principiante123', 'principiante@esempio.com', 'e9ceb0138dee3739f18581de8d3336da7c3b5cb100017f1ecf8dcdd65b5b4dc5', '2024-04-18 10:00:00', 'utente', 8),
-(9, 'GranMaestro', 'gm@esempio.com', '9fe66e11675b44f166725b2ccf127a556545a624b3de6dae00c85b6ff2be3050', '2023-08-05 15:45:00', 'admin', 9),
+(9, 'GranMaestro', 'gm@esempio.com', 'ad7ae45b78ea85db82c361f2bdf50ce9b794ed6b9ef199e7c649cde23d3bd5dc', '2023-08-05 15:45:00', 'admin', 9),
 (10, 'GiuseppeMedio', 'giuseppe@esempio.com', '46610d0506e957be8a0a66be0daa47ac65dba9283c72b4093eae4e1a3a442f1a', '2024-02-29 12:30:00', 'utente', 10);
 
 --

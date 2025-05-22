@@ -5,6 +5,7 @@ import LoginView from '@/views/LoginView.vue'
 import PlayerView from '@/views/PlayerView.vue'
 import StatsView from '@/views/StatsView.vue'
 import PartitaView from '@/views/PartitaView.vue'
+import ClanView from '@/views/ClanView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/partita/:id',
       name: 'partita',
       component: PartitaView
+    },
+    {
+      path: '/clan/:nome',
+      name: 'clan',
+      component: ClanView
     },
   ],
 })

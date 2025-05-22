@@ -1,5 +1,13 @@
 <script setup lang="tsx">
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
+import { userSession, logoutUser } from '@/main';
+
+const router = useRouter();
+
+function handleLogout() {
+  logoutUser();
+  router.push('/login');
+}
 </script>
 
 <template>
@@ -13,7 +21,13 @@ import { RouterLink } from 'vue-router';
     <nav class="nav-buttons">
       <RouterLink to="/stats" class="nav-btn">Statistiche</RouterLink>
       <RouterLink to="/eroi" class="nav-btn">Eroi</RouterLink>
-      <RouterLink to="/login" class="nav-btn">Login</RouterLink>
+      <template v-if="userSession">
+        <span class="user-info">Ciao, {{ userSession.ute_username }} <span class="user-role">[{{ userSession.ute_ruolo }}]</span></span>
+        <button class="nav-btn" @click="handleLogout">Logout</button>
+      </template>
+      <template v-else>
+        <RouterLink to="/login" class="nav-btn">Login</RouterLink>
+      </template>
     </nav>
   </header>
 </template>
@@ -65,5 +79,18 @@ import { RouterLink } from 'vue-router';
 }
 .nav-btn:hover {
   background: #13b85a;
+}
+.user-info {
+  color: #fff;
+  font-size: 1.1rem;
+  margin-right: 1.2rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+.user-role {
+  color: #19d86b;
+  margin-left: 0.3rem;
+  font-size: 1.1rem;
 }
 </style>

@@ -1,24 +1,94 @@
 <script setup lang="tsx">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+
+// Registrazione
+const regUsername = ref('')
+const regEmail = ref('')
+const regPassword = ref('')
+const regError = ref('')
+const regSuccess = ref('')
+
+// Login
+const loginUsername = ref('')
+const loginPassword = ref('')
+const loginError = ref('')
+
+// Gestione sessione utente
+type UserSession = { ute_id: number, ute_username: string, ute_ruolo: string }
+function setUserSession(user: UserSession) {
+  localStorage.setItem('user', JSON.stringify(user))
+}
+
+// Registrazione
+async function handleRegister() {
+  regError.value = ''
+  regSuccess.value = ''
+  if (!regUsername.value || !regEmail.value || !regPassword.value) {
+    regError.value = 'Tutti i campi sono obbligatori'
+    return
+  }
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Utenti/registrazione.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: regUsername.value, email: regEmail.value, password: regPassword.value })
+  })
+  const data = await res.json()
+  if (data.success) {
+    regSuccess.value = 'Registrazione avvenuta! Ora puoi accedere.'
+    // Reset campi
+    regUsername.value = ''
+    regEmail.value = ''
+    regPassword.value = ''
+  } else {
+    regError.value = data.message || 'Errore nella registrazione'
+  }
+}
+
+// Login
+async function handleLogin() {
+  loginError.value = ''
+  if (!loginUsername.value || !loginPassword.value) {
+    loginError.value = 'Tutti i campi sono obbligatori'
+    return
+  }
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Utenti/login.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: loginUsername.value, password: loginPassword.value })
+  })
+  const data = await res.json()
+  if (data.success) {
+    setUserSession(data.user)
+    router.push('/')
+  } else {
+    loginError.value = data.message || 'Credenziali non valide'
+  }
+}
 </script>
 
 <template>
   <div class="auth-container">
     <div class="auth-card">
       <h2 class="auth-title">Registrati</h2>
-      <input class="auth-input" type="text" placeholder="Username" />
-      <input class="auth-input" type="email" placeholder="Email" />
-      <input class="auth-input" type="password" placeholder="Password" />
+      <input class="auth-input" type="text" placeholder="Username" v-model="regUsername" />
+      <input class="auth-input" type="email" placeholder="Email" v-model="regEmail" />
+      <input class="auth-input" type="password" placeholder="Password" v-model="regPassword" />
+      <div v-if="regError" style="color:#ff4d4d; margin-bottom:1rem;">{{ regError }}</div>
+      <div v-if="regSuccess" style="color:#19d86b; margin-bottom:1rem;">{{ regSuccess }}</div>
       <div class="spacer"></div>
-      <button class="auth-btn">Registrati</button>
+      <button class="auth-btn" @click="handleRegister">Registrati</button>
     </div>
     <div class="divider">o</div>
     <div class="auth-card">
       <h2 class="auth-title">Login</h2>
-      <input class="auth-input" type="text" placeholder="Username o Email" />
-      <input class="auth-input" type="password" placeholder="Password" />
+      <input class="auth-input" type="text" placeholder="Username" v-model="loginUsername" />
+      <input class="auth-input" type="password" placeholder="Password" v-model="loginPassword" />
+      <div v-if="loginError" style="color:#ff4d4d; margin-bottom:1rem;">{{ loginError }}</div>
       <div class="spacer"></div>
-      <button class="auth-btn">Accedi</button>
+      <button class="auth-btn" @click="handleLogin">Accedi</button>
     </div>
   </div>
 </template>

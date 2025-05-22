@@ -18,6 +18,9 @@
         <Dropdown v-model="mappa" :options="mappaOptions" optionLabel="name" optionValue="value" placeholder="Mappe" class="p-dropdown-green" />
         <Dropdown v-model="rank" :options="rankOptions" optionLabel="name" optionValue="value" placeholder="Rank" class="p-dropdown-green" />
       </template>
+      <template v-if="activeTab === 'clan' && user && user.ute_ruolo === 'admin'">
+        <button class="auth-btn" style="margin-left:2rem;" @click="alert('Qui puoi aggiungere un clan (solo admin)')">Aggiungi Clan</button>
+      </template>
     </div>
     <div class="table-container">
       <DataTable v-if="activeTab === 'eroi'" :value="filteredEroi">
@@ -102,7 +105,7 @@
         </Column>
         <Column field="nome" header="Clan" :sortable="true">
           <template #body="slotProps">
-            {{ slotProps.data.nome }}
+            <router-link :to="`/clan/${encodeURIComponent(slotProps.data.nome)}`">{{ slotProps.data.nome }}</router-link>
           </template>
         </Column>
         <Column field="punti" header="Punti" :sortable="true">
@@ -150,6 +153,16 @@ const modalita = ref('')
 const search = ref('')
 
 const modalitaList = ref([])
+
+// --- GESTIONE RUOLO UTENTE ---
+const user = ref(null)
+function loadUser() {
+  const u = localStorage.getItem('user')
+  user.value = u ? JSON.parse(u) : null
+}
+loadUser()
+window.addEventListener('storage', loadUser)
+// --- FINE GESTIONE RUOLO ---
 
 const modalitaDisponibili = computed(() => {
   const set = new Set()

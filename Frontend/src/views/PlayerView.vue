@@ -15,7 +15,9 @@
           <div class="eroi-giocati">
             <div class="sidebar-title">Eroi Giocati</div>
             <div v-for="eroe in player.eroiGiocati" :key="eroe.ero_id" class="eroe-giocato-card">
-              <span>{{ eroe.nome || eroe.name || 'Eroe' }}</span>
+              <router-link :to="`/eroe/${eroe.nome || eroe.name || 'Eroe'}`">
+                <span>{{ eroe.nome || eroe.name || 'Eroe' }}</span>
+              </router-link>
             </div>
           </div>
         </div>

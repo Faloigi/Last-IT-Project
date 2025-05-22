@@ -344,3 +344,37 @@ function getEroe($nome) {
     $eroe['matches'] = $matches;
     return $eroe;
 }
+
+function getClanData($nome) {
+    global $conn;
+    if (!$nome) return null;
+    // Info base clan
+    $query = "SELECT c.cln_id, c.cln_nome as nome, c.cln_punti as punti, c.cln_image as img, r.ran_nome as rank, r.ran_image as rank_img FROM clans c LEFT JOIN ranks r ON c.cln_ran_id = r.ran_id WHERE c.cln_nome = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $nome);
+    $stmt->execute();
+    $clan = $stmt->get_result()->fetch_assoc();
+    if (!$clan) return null;
+    // Lista membri
+    $query = "SELECT pla_id, pla_username, pla_livello, pla_mmr FROM players WHERE pla_cln_id = ? ORDER BY pla_mmr DESC";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $clan['cln_id']);
+    $stmt->execute();
+    $membri = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $clan['membri'] = $membri;
+    // Statistiche generali sulle partite del clan
+    $query = "SELECT COUNT(*) as partite, ROUND(SUM(p.ptr_uccisioni)/NULLIF(SUM(p.ptr_morti),0),1) as kd, ROUND(SUM(CASE WHEN p.ptr_risultato = 'Vinto' THEN 1 ELSE 0 END)/COUNT(*),2)*100 as vittorie, ROUND(AVG(p.ptr_danni),1) as danni FROM partecipazioni p JOIN players pl ON p.ptr_pla_id = pl.pla_id WHERE pl.pla_cln_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $clan['cln_id']);
+    $stmt->execute();
+    $stats = $stmt->get_result()->fetch_assoc();
+    $clan = array_merge($clan, $stats);
+    // Migliori partite dei membri (top 10 danni)
+    $query = "SELECT par.par_id, pl.pla_username as username, par.par_inizio as data, m.mod_nome as modalita, mp.map_nome as mappa, e.ero_nome as eroe, p.ptr_uccisioni as uccisioni, p.ptr_morti as morti, p.ptr_danni as danni, p.ptr_cure as cure, p.ptr_risultato as risultato FROM partecipazioni p JOIN players pl ON p.ptr_pla_id = pl.pla_id JOIN partite par ON p.ptr_par_id = par.par_id LEFT JOIN modalita m ON par.par_mod_id = m.mod_id LEFT JOIN mappe mp ON par.par_map_id = mp.map_id LEFT JOIN eroi e ON p.ptr_ero_id = e.ero_id WHERE pl.pla_cln_id = ? ORDER BY p.ptr_danni DESC LIMIT 10";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $clan['cln_id']);
+    $stmt->execute();
+    $matches = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $clan['matches'] = $matches;
+    return $clan;
+}
