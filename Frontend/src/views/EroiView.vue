@@ -1,11 +1,8 @@
 <template>
   <div class="eroi-container">
-    <div v-if="isAdmin" class="admin-buttons">
-      <button class="admin-btn">Crea Eroe</button>
-    </div>
     <h1>Eroi</h1>
     <div class="filters">
-      <input v-model="search" placeholder="Cerca Player/Clan/Eroe..." />
+      <input v-model="search" placeholder="Cerca Eroe..." />
       <Dropdown v-model="classe" :options="classeOptionsDropdown" optionLabel="name" optionValue="value" placeholder="Tutte le classi" class="p-dropdown-green" />
       <Dropdown v-model="difficolta" :options="difficoltaOptionsDropdown" optionLabel="name" optionValue="value" placeholder="Tutte le difficoltà" class="p-dropdown-green" />
     </div>
@@ -20,7 +17,7 @@
             <div class="eroe-card-header">{{ eroe.eroe }}</div>
           </router-link>
           <div class="eroe-card-img">
-            <img v-if="eroe.img" :src="eroe.img" :alt="eroe.eroe" />
+            <img v-if="eroe.img" :src="getHeroImgSrc(eroe.img)" :alt="eroe.eroe" />
             <span v-else>Immagine</span>
           </div>
           <div class="eroe-card-info">
@@ -31,10 +28,13 @@
           </div>
           <div v-if="isAdmin" class="admin-buttons-card">
             <button class="admin-btn-card" @click="$router.push(`/eroi/modifica/${encodeURIComponent(eroe.eroe)}`)">Modifica</button>
-            <button class="admin-btn-card">Elimina</button>
+            <button class="admin-btn-card" @click="handleDeleteEroe(eroe)">Elimina</button>
           </div>
         </div>
       </div>
+    </div>
+    <div v-if="isAdmin" class="admin-buttons admin-buttons-bottom">
+      <router-link to="admin/eroi/crea" class="admin-btn">Crea Eroe</router-link>
     </div>
   </div>
 </template>
@@ -65,12 +65,23 @@ const difficoltaDisponibili = computed(() => {
 const classeOptionsDropdown = computed(() => [{ name: 'Tutte le classi', value: '' }, ...classiDisponibili.value.map(c => ({ name: c, value: c }))])
 const difficoltaOptionsDropdown = computed(() => [{ name: 'Tutte le difficoltà', value: '' }, ...difficoltaDisponibili.value.map(d => ({ name: d, value: d }))])
 
-// Fetch dati eroi da PHP
+function mapEroe(raw) {
+  return {
+    eroe: raw.eroe || raw.ero_nome || raw.nome,
+    classe: raw.classe || raw.cla_nome,
+    difficolta: raw.difficolta || raw.ero_difficolta,
+    img: raw.img || raw.ero_image || raw.image,
+    partite: raw.partite_giocate || raw.partite,
+    vittorie: raw.vittorie,
+    id: raw.id || raw.ero_id
+  }
+}
+
 const fetchEroi = async () => {
   try {
     const res = await fetch('http://localhost/BigBlackDeath/backend/Eroi/getStatsEroe.php')
     const data = await res.json()
-    eroi.value = Array.isArray(data) ? data : []
+    eroi.value = Array.isArray(data) ? data.map(mapEroe) : []
   } catch (e) {
     eroi.value = []
   }
@@ -95,6 +106,27 @@ const filteredEroi = computed(() =>
     (!difficolta.value || eroe.difficolta === difficolta.value)
   )
 )
+
+function getHeroImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/heroes/')) return img
+  return `/images/heroes/${img}`
+}
+
+function handleDeleteEroe(eroe) {
+  if (!confirm(`Sei sicuro di voler eliminare ${eroe.eroe}?`)) return
+  fetch('http://localhost/BigBlackDeath/backend/Eroi/deleteEroe.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: eroe.id })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) fetchEroi()
+      else alert(data.error || 'Errore eliminazione')
+    })
+    .catch(() => alert('Errore eliminazione'))
+}
 </script>
 
 <style scoped>
@@ -104,6 +136,9 @@ const filteredEroi = computed(() =>
   background: #071b13;
   min-height: 100vh;
   padding-top: 80px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 h1 {
   font-size: 2.5rem;
@@ -271,5 +306,11 @@ h1 {
 }
 .admin-btn-card:hover {
   filter: brightness(1.1);
+}
+.admin-buttons-bottom {
+  margin-top: 2.5rem;
+  justify-content: center !important;
+  display: flex;
+  width: 100%;
 }
 </style>

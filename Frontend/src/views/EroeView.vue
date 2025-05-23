@@ -7,8 +7,9 @@
     <div v-else-if="eroe">
       <div class="hero-info-box">
         <div class="hero-img-box">
-          <img v-if="eroe.img" :src="eroe.img" :alt="eroe.eroe" />
+          <img v-if="eroe.img" :src="getHeroImgSrc(eroe.img)" :alt="eroe.eroe" @error="onImageError" />
           <span v-else class="img-placeholder">Immagine</span>
+          <div v-if="imageError" class="img-path-preview" style="color:#e74c3c">Immagine non trovata</div>
         </div>
         <div class="hero-details">
           <div><b>Classe:</b> {{ eroe.classe || '-' }}</div>
@@ -54,6 +55,8 @@ const nome = route.params.nome
 const eroe = ref(null)
 const fetchErrore = ref(false)
 const loading = ref(true)
+const imageError = ref(false)
+const isAdmin = ref(false)
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -76,8 +79,25 @@ async function fetchEroe() {
   }
 }
 
+function getHeroImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/heroes/')) return img
+  return `/images/heroes/${img}`
+}
+
+function onImageError() {
+  imageError.value = true
+}
+
 onMounted(() => {
   fetchEroe()
+  const user = localStorage.getItem('user')
+  if (user) {
+    try {
+      const parsed = JSON.parse(user)
+      isAdmin.value = parsed.ute_ruolo === 'admin'
+    } catch {}
+  }
 })
 </script>
 
@@ -88,6 +108,9 @@ onMounted(() => {
   background: #071b13;
   min-height: 100vh;
   padding-top: 80px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 h1 {
   font-size: 2.5rem;

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Creato il: Mag 22, 2025 alle 16:16
+-- Creato il: Mag 23, 2025 alle 21:56
 -- Versione del server: 10.4.32-MariaDB
 -- Versione PHP: 8.0.30
 
@@ -89,16 +89,16 @@ CREATE TABLE `eroi` (
 --
 
 INSERT INTO `eroi` (`ero_id`, `ero_nome`, `ero_difficolta`, `ero_cla_id`, `ero_image`) VALUES
-(1, 'Guardiapietra', 2, 1, NULL),
-(2, 'Lamaombra', 4, 2, NULL),
-(3, 'Tessigelo', 3, 3, NULL),
-(4, 'Custodevitale', 3, 4, NULL),
-(5, 'Occhiodifalco', 2, 5, NULL),
-(6, 'Corazzadura', 1, 1, NULL),
-(7, 'Ombratossica', 5, 2, NULL),
-(8, 'Piromenta', 4, 3, NULL),
-(9, 'Armonia', 2, 4, NULL),
-(10, 'Occhiodiferro', 3, 5, NULL);
+(1, 'Guardiapietra', 2, 1, 'Guardiadipietra.png'),
+(2, 'Lamaombra', 4, 2, 'Lamaombra.png'),
+(3, 'Tessigelo', 3, 3, 'Tessigelo.png'),
+(4, 'Custodevitale', 3, 4, 'custodevitale.png'),
+(5, 'Occhiodifalco', 2, 5, 'Occhidifalco.png'),
+(6, 'Corazzadura', 1, 1, 'Corazzadura.png'),
+(7, 'Ombratossica', 5, 2, 'Ombratossica.png'),
+(8, 'Piromenta', 4, 3, 'Piromenta.png'),
+(9, 'Armonia', 2, 4, 'Armonia.png'),
+(10, 'Occhiodiferro', 3, 5, 'Occhidiferro.png');
 
 -- --------------------------------------------------------
 
@@ -301,7 +301,7 @@ CREATE TRIGGER `after_player_clan_points_delete` AFTER DELETE ON `players` FOR E
                 FROM players
                 WHERE pla_cln_id = OLD.pla_cln_id
             ),
-            cla_ran_id = (
+            cln_ran_id = (
                 SELECT ran_id
                 FROM ranks
                 WHERE (
@@ -325,7 +325,7 @@ CREATE TRIGGER `after_player_clan_points_insert` AFTER INSERT ON `players` FOR E
                 FROM players
                 WHERE pla_cln_id = NEW.pla_cln_id
             ),
-            cla_ran_id = (
+            cln_ran_id = (
                 SELECT ran_id
                 FROM ranks
                 WHERE (
@@ -342,7 +342,6 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `after_player_clan_points_update` AFTER UPDATE ON `players` FOR EACH ROW BEGIN
-    -- Aggiorna il vecchio clan (se esisteva)
     IF OLD.pla_cln_id IS NOT NULL THEN
         UPDATE clans
         SET cln_punti = (
@@ -350,7 +349,7 @@ CREATE TRIGGER `after_player_clan_points_update` AFTER UPDATE ON `players` FOR E
                 FROM players
                 WHERE pla_cln_id = OLD.pla_cln_id
             ),
-            cla_ran_id = (
+            cln_ran_id = (
                 SELECT ran_id
                 FROM ranks
                 WHERE (
@@ -362,7 +361,6 @@ CREATE TRIGGER `after_player_clan_points_update` AFTER UPDATE ON `players` FOR E
             )
         WHERE cln_id = OLD.pla_cln_id;
     END IF;
-    -- Aggiorna il nuovo clan (se esiste)
     IF NEW.pla_cln_id IS NOT NULL THEN
         UPDATE clans
         SET cln_punti = (
@@ -370,7 +368,7 @@ CREATE TRIGGER `after_player_clan_points_update` AFTER UPDATE ON `players` FOR E
                 FROM players
                 WHERE pla_cln_id = NEW.pla_cln_id
             ),
-            cla_ran_id = (
+            cln_ran_id = (
                 SELECT ran_id
                 FROM ranks
                 WHERE (
@@ -389,7 +387,7 @@ DELIMITER $$
 CREATE TRIGGER `after_player_clan_rank_delete` AFTER DELETE ON `players` FOR EACH ROW BEGIN
     IF OLD.pla_cln_id IS NOT NULL THEN
         UPDATE clans
-        SET cla_ran_id = (
+        SET cln_ran_id = (
             SELECT ran_id
             FROM ranks
             WHERE (
@@ -408,7 +406,7 @@ DELIMITER $$
 CREATE TRIGGER `after_player_clan_rank_insert` AFTER INSERT ON `players` FOR EACH ROW BEGIN
     IF NEW.pla_cln_id IS NOT NULL THEN
         UPDATE clans
-        SET cla_ran_id = (
+        SET cln_ran_id = (
             SELECT ran_id
             FROM ranks
             WHERE (
@@ -425,10 +423,9 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `after_player_clan_rank_update` AFTER UPDATE ON `players` FOR EACH ROW BEGIN
-    -- Aggiorna il rank del vecchio clan (se esisteva)
     IF OLD.pla_cln_id IS NOT NULL THEN
         UPDATE clans
-        SET cla_ran_id = (
+        SET cln_ran_id = (
             SELECT ran_id
             FROM ranks
             WHERE (
@@ -440,10 +437,9 @@ CREATE TRIGGER `after_player_clan_rank_update` AFTER UPDATE ON `players` FOR EAC
         )
         WHERE cln_id = OLD.pla_cln_id;
     END IF;
-    -- Aggiorna il rank del nuovo clan (se esiste)
     IF NEW.pla_cln_id IS NOT NULL THEN
         UPDATE clans
-        SET cla_ran_id = (
+        SET cln_ran_id = (
             SELECT ran_id
             FROM ranks
             WHERE (
@@ -565,13 +561,13 @@ CREATE TABLE `ranks` (
 --
 
 INSERT INTO `ranks` (`ran_id`, `ran_nome`, `ran_min`, `ran_max`, `ran_image`) VALUES
-(1, 'Bronzo', 0, 999, '\\images\\ranks\\bronzo.jpeg'),
-(2, 'Argento', 1000, 1999, '\\images\\ranks\\argento.jpg'),
-(3, 'Oro', 2000, 2999, '\\images\\ranks\\oro.jpeg'),
-(4, 'Platino', 3000, 3999, '\\images\\ranks\\platino.jpg'),
-(5, 'Diamante', 4000, 4999, '\\images\\ranks\\diamante.jpeg'),
-(6, 'Maestro', 5000, 5999, '\\images\\ranks\\maestro.jpeg'),
-(7, 'Gran Maestro', 6000, 9999, '\\images\\ranks\\grande_maestro.jpeg');
+(1, 'Bronzo', 0, 999, 'bronzo.jpeg'),
+(2, 'Argento', 1000, 1999, 'argento.jpg'),
+(3, 'Oro', 2000, 2999, 'oro.jpeg'),
+(4, 'Platino', 3000, 3999, 'platino.jpg'),
+(5, 'Diamante', 4000, 4999, 'diamante.jpeg'),
+(6, 'Maestro', 5000, 5999, 'maestro.jpeg'),
+(7, 'Gran Maestro', 6000, 9999, 'grande_maestro.jpeg');
 
 -- --------------------------------------------------------
 
@@ -603,7 +599,8 @@ INSERT INTO `utenti` (`ute_id`, `ute_username`, `ute_email`, `ute_password`, `ut
 (7, 'SignoreFiamma', 'fiamma@esempio.com', '5ec74678da9c4a222189e25d0f3308f24bfe4f5ce150c12b9039278d05a89f70', '2023-12-10 20:05:00', 'utente', 7),
 (8, 'Principiante123', 'principiante@esempio.com', 'e9ceb0138dee3739f18581de8d3336da7c3b5cb100017f1ecf8dcdd65b5b4dc5', '2024-04-18 10:00:00', 'utente', 8),
 (9, 'GranMaestro', 'gm@esempio.com', 'ad7ae45b78ea85db82c361f2bdf50ce9b794ed6b9ef199e7c649cde23d3bd5dc', '2023-08-05 15:45:00', 'admin', 9),
-(10, 'GiuseppeMedio', 'giuseppe@esempio.com', '46610d0506e957be8a0a66be0daa47ac65dba9283c72b4093eae4e1a3a442f1a', '2024-02-29 12:30:00', 'utente', 10);
+(10, 'GiuseppeMedio', 'giuseppe@esempio.com', '46610d0506e957be8a0a66be0daa47ac65dba9283c72b4093eae4e1a3a442f1a', '2024-02-29 12:30:00', 'utente', 10),
+(11, 'Falo', 'faloigi5@gmail.com', 'f7dc51baf418e0c6d7aadac2e9dd703049d99e5b4948d79b0f8539c689c116c5', '2025-05-23 15:31:25', 'admin', NULL);
 
 --
 -- Indici per le tabelle scaricate
@@ -704,7 +701,7 @@ ALTER TABLE `classi`
 -- AUTO_INCREMENT per la tabella `eroi`
 --
 ALTER TABLE `eroi`
-  MODIFY `ero_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `ero_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT per la tabella `mappe`
@@ -746,7 +743,7 @@ ALTER TABLE `ranks`
 -- AUTO_INCREMENT per la tabella `utenti`
 --
 ALTER TABLE `utenti`
-  MODIFY `ute_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `ute_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Limiti per le tabelle scaricate

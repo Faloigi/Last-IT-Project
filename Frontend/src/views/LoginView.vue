@@ -1,6 +1,7 @@
 <script setup lang="tsx">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { loginUser } from '@/main'
 
 const router = useRouter()
 
@@ -17,10 +18,10 @@ const loginPassword = ref('')
 const loginError = ref('')
 
 // Gestione sessione utente
-type UserSession = { ute_id: number, ute_username: string, ute_ruolo: string }
-function setUserSession(user: UserSession) {
-  localStorage.setItem('user', JSON.stringify(user))
-}
+// type UserSession = { ute_id: number, ute_username: string, ute_ruolo: string }
+// function setUserSession(user: UserSession) {
+//   localStorage.setItem('user', JSON.stringify(user))
+// }
 
 // Registrazione
 async function handleRegister() {
@@ -61,7 +62,7 @@ async function handleLogin() {
   })
   const data = await res.json()
   if (data.success) {
-    setUserSession(data.user)
+    loginUser(data.user)
     router.push('/')
   } else {
     loginError.value = data.message || 'Credenziali non valide'
@@ -101,6 +102,9 @@ async function handleLogin() {
   justify-content: center;
   background: #02190f;
   gap: 2rem;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 .auth-card {
   background: #323232;

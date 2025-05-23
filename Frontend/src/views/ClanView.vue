@@ -1,10 +1,5 @@
 <template>
   <div class="clan-container" v-if="loading === false">
-    <div v-if="isAdmin" class="admin-buttons">
-      <button class="admin-btn">Crea Clan</button>
-      <button class="admin-btn">Modifica Clan</button>
-      <button class="admin-btn">Elimina Clan</button>
-    </div>
     <h1>{{ clan?.nome || nome }}</h1>
     <div v-if="fetchError" class="error-message">
       Clan non trovato o errore di rete.
@@ -17,7 +12,7 @@
         </div>
         <div class="clan-details">
           <div><b>Punti:</b> {{ clan.punti || '-' }}</div>
-          <div><b>Rank:</b> <img v-if="clan.rank_img" :src="clan.rank_img" class="rank-img" /> <span v-else>{{ clan.rank || '-' }}</span></div>
+          <div><b>Rank:</b> <img v-if="clan.rank_img" :src="getRankImgSrc(clan.rank_img)" class="rank-img" /> <span v-else>{{ clan.rank || '-' }}</span></div>
           <div><b>Partite giocate:</b> {{ clan.partite || '-' }}</div>
           <div><b>KDA:</b> {{ clan.kd || '-' }}</div>
           <div><b>% Vittorie:</b> {{ clan.vittorie ? clan.vittorie + '%' : '-' }}</div>
@@ -78,6 +73,12 @@ function formatDate(dateStr) {
   return d.toLocaleString()
 }
 
+function getRankImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/ranks/')) return img
+  return `/images/ranks/${img}`
+}
+
 async function fetchClan() {
   fetchError.value = false
   loading.value = true
@@ -112,6 +113,9 @@ onMounted(() => {
   background: #071b13;
   min-height: 100vh;
   padding-top: 80px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 h1 {
   font-size: 2.5rem;
@@ -294,26 +298,5 @@ h1 {
   text-align: center;
   font-size: 1.3rem;
   margin-top: 2rem;
-}
-.admin-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  justify-content: center;
-}
-.admin-btn {
-  background: #19d86b;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.admin-btn:hover {
-  background: #13b85a;
 }
 </style>

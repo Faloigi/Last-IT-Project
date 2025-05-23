@@ -8,5 +8,9 @@ $classe = $_GET['classe'] ?? null;
 $mappa = $_GET['mappa'] ?? null;
 $rank = $_GET['rank'] ?? null;
 
-$result = getStatsEroe($classe, $mappa, $rank);
+if (!$classe && !$mappa && !$rank) {
+  $result = getAllEroi();
+} else {
+  $result = getStatsEroe($classe, $mappa, $rank);
+}
 echo json_encode(is_array($result) ? $result : []); 

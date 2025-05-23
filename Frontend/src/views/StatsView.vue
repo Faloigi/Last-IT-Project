@@ -319,10 +319,16 @@ const emptyMessageTemplate = (options) => {
     template: `<div class="custom-empty-message">No available options</div>`
   }
 }
+
+function getRankImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/ranks/')) return img
+  return `/images/ranks/${img}`
+}
 </script>
 
 <style scoped>
-.stats-container { padding: 2rem; color: #fff; background: #071b13; min-height: 100vh; padding-top: 80px; }
+.stats-container { padding: 2rem; color: #fff; background: #071b13; min-height: 100vh; padding-top: 80px; overflow-x: hidden; box-sizing: border-box; max-width: 100vw; }
 .tabs { margin-bottom: 1rem; }
 .tabs button { margin-right: 1rem; background: none; border: none; color: #fff; font-size: 1.2rem; border-bottom: 2px solid transparent; cursor: pointer; }
 .tabs button.active { border-bottom: 2px solid #1affb2; }

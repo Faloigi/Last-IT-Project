@@ -1,10 +1,13 @@
 <script setup lang="tsx">
 import { RouterLink, useRouter } from 'vue-router';
 import { userSession, logoutUser } from '@/main';
+import { ref } from 'vue'
 
 const router = useRouter();
+const showMenu = ref(false)
 
 function handleLogout() {
+  showMenu.value = false
   logoutUser();
   router.push('/login');
 }
@@ -21,9 +24,18 @@ function handleLogout() {
     <nav class="nav-buttons">
       <RouterLink to="/stats" class="nav-btn">Statistiche</RouterLink>
       <RouterLink to="/eroi" class="nav-btn">Eroi</RouterLink>
+      <RouterLink to="/clans" class="nav-btn">Clan</RouterLink>
       <template v-if="userSession">
-        <span class="user-info">Ciao, {{ userSession.ute_username }} <span class="user-role">[{{ userSession.ute_ruolo }}]</span></span>
-        <button class="nav-btn" @click="handleLogout">Logout</button>
+        <div class="user-menu-wrapper" tabindex="0" @click="showMenu = !showMenu" @blur="showMenu = false">
+          <svg class="user-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 16-4 16 0" /></svg>
+          <div v-if="showMenu" class="user-dropdown">
+            <div class="user-dropdown-info">
+              <b>{{ userSession.ute_username }}</b>
+              <span class="user-role">[{{ userSession.ute_ruolo }}]</span>
+            </div>
+            <button class="dropdown-logout" @click.stop="handleLogout">Logout</button>
+          </div>
+        </div>
       </template>
       <template v-else>
         <RouterLink to="/login" class="nav-btn">Login</RouterLink>
@@ -61,6 +73,7 @@ function handleLogout() {
   display: flex;
   gap: 17rem;
   margin: 0 auto;
+  align-items: center;
 }
 .nav-btn {
   background: #19d86b;
@@ -80,17 +93,70 @@ function handleLogout() {
 .nav-btn:hover {
   background: #13b85a;
 }
-.user-info {
-  color: #fff;
-  font-size: 1.1rem;
-  margin-right: 1.2rem;
-  font-weight: 500;
+.user-menu-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
+  cursor: pointer;
+  outline: none;
+}
+.user-icon {
+  width: 38px;
+  height: 38px;
+  fill: #19d86b;
+  background: #09351e;
+  border-radius: 50%;
+  padding: 6px;
+  transition: background 0.2s;
+}
+.user-menu-wrapper:focus .user-icon,
+.user-menu-wrapper:hover .user-icon {
+  background: #19d86b22;
+}
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  background: #09351e;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px #0005;
+  min-width: 180px;
+  padding: 1rem 1.2rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  animation: fadeIn 0.18s;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+.user-dropdown-info {
+  color: #fff;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .user-role {
   color: #19d86b;
-  margin-left: 0.3rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  margin-left: 0.2rem;
+}
+.dropdown-logout {
+  background: #19d86b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dropdown-logout:hover {
+  background: #13b85a;
 }
 </style>

@@ -6,9 +6,11 @@ import PlayerView from '@/views/PlayerView.vue'
 import StatsView from '@/views/StatsView.vue'
 import PartitaView from '@/views/PartitaView.vue'
 import ClanView from '@/views/ClanView.vue'
-import EroeEditView from '@/views/EroeEditView.vue'
+import ClansView from '@/views/ClansView.vue'
 import AdminCreaEroeView from '@/views/ADMIN/CreaEroeView.vue'
 import AdminEroeEditView from '@/views/ADMIN/EroeEditView.vue'
+import AdminCreaClanView from '@/views/ADMIN/CreaClanView.vue'
+import AdminClanEditView from '@/views/ADMIN/ClanEditView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -55,11 +57,17 @@ const router = createRouter({
       component: ClanView
     },
     {
-      path: '/eroi/modifica/:nome',
-      name: 'modifica-eroe',
-      component: EroeEditView
+      path: '/clans',
+      name: 'clans',
+      component: ClansView
     },
     // ADMIN routes
+    {
+      path: '/eroi/modifica/:nome',
+      name: 'modifica-eroe',
+      component: AdminEroeEditView,
+      meta: { requiresAdmin: true }
+    },
     {
       path: '/admin/eroi/crea',
       name: 'admin-crea-eroe',
@@ -67,21 +75,30 @@ const router = createRouter({
       meta: { requiresAdmin: true }
     },
     {
-      path: '/admin/eroi/modifica/:nome',
-      name: 'admin-modifica-eroe',
-      component: AdminEroeEditView,
+      path: '/clan/modifica/:nome',
+      name: 'modifica-clan',
+      component: AdminClanEditView,
+      meta: { requiresAdmin: true }
+    },
+    {
+      path: '/admin/clan/crea',
+      name: 'admin-crea-clan',
+      component: AdminCreaClanView,
       meta: { requiresAdmin: true }
     },
   ],
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAdmin) {
-    const userRole = localStorage.getItem('userRole')
-    if (userRole !== 'admin') {
-      // Puoi mostrare un messaggio o reindirizzare dove vuoi
-      return next({ name: 'home' })
-    }
+  let userRole = null
+  const user = localStorage.getItem('user')
+  if (user) {
+    try {
+      userRole = JSON.parse(user).ute_ruolo
+    } catch {}
+  }
+  if (to.meta.requiresAdmin && userRole !== 'admin') {
+    return next({ name: 'home' })
   }
   next()
 })

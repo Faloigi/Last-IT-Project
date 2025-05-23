@@ -2,17 +2,16 @@
 header('Access-Control-Allow-Origin: http://localhost:5173');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
-require_once '../methods.php';
+require_once __DIR__ . '/../methods.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
-$nome = $input['nome'] ?? '';
-$difficolta = $input['difficolta'] ?? 1;
-$cla_id = $input['cla_id'] ?? null;
-$image = $input['image'] ?? '';
+$username = $input['username'] ?? '';
+$clan = $input['clan'] ?? '';
 
-if (!$nome || !$difficolta || !$cla_id) {
+if (!$username || !$clan) {
   echo json_encode(["success" => false, "error" => "Dati obbligatori mancanti"]);
   exit;
 }
 
-echo json_encode(createEroe($nome, $difficolta, $cla_id, $image)); 
+$result = addPlayerToClan($username, $clan);
+echo json_encode($result); 

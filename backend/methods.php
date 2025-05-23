@@ -1,5 +1,5 @@
 <?php
-$conn = require_once 'conn.php';
+$conn = require 'conn.php';
 function getNumberPlayers() {
     global $conn;
     $query = "SELECT COUNT(*) FROM players";
@@ -435,4 +435,87 @@ function updateEroeByName($nome_originale, $nome_nuovo, $difficolta, $cla_id, $i
     } else {
         return ["success" => false, "error" => $stmt->error];
     }
+}
+
+function getAllEroi() {
+    global $conn;
+    $query = "SELECT e.ero_id as id, e.ero_nome as eroe, c.cla_nome as classe, e.ero_difficolta as difficolta, e.ero_image as img,
+        COUNT(p.ptr_id) as partite,
+        ROUND(SUM(CASE WHEN p.ptr_risultato = 'Vinto' THEN 1 ELSE 0 END) / NULLIF(COUNT(p.ptr_id),0) * 100, 2) as vittorie
+    FROM eroi e
+    LEFT JOIN classi c ON e.ero_cla_id = c.cla_id
+    LEFT JOIN partecipazioni p ON p.ptr_ero_id = e.ero_id
+    GROUP BY e.ero_id, e.ero_nome, c.cla_nome, e.ero_difficolta, e.ero_image
+    ORDER BY e.ero_nome";
+    $result = $conn->query($query);
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function addPlayerToClan($username, $clan_nome) {
+    global $conn;
+    $stmt = $conn->prepare("SELECT cln_id FROM clans WHERE cln_nome = ?");
+    $stmt->bind_param("s", $clan_nome);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    if (!$row) {
+        return ["success" => false, "error" => "Clan non trovato"];
+    }
+    $clan_id = $row['cln_id'];
+    $stmt = $conn->prepare("UPDATE players SET pla_cln_id = ? WHERE pla_username = ?");
+    $stmt->bind_param("is", $clan_id, $username);
+    if ($stmt->execute()) {
+        return ["success" => true];
+    } else {
+        return ["success" => false, "error" => $stmt->error];
+    }
+}
+
+function removePlayerFromClan($username) {
+    global $conn;
+    $stmt = $conn->prepare("UPDATE players SET pla_cln_id = NULL WHERE pla_username = ?");
+    $stmt->bind_param("s", $username);
+    if ($stmt->execute()) {
+        return ["success" => true];
+    } else {
+        return ["success" => false, "error" => $stmt->error];
+    }
+}
+
+function createClan($nome, $image, $membri, $creator) {
+    global $conn;
+    if (!$nome || !$image || empty($membri) || !$creator) {
+        return ['success' => false, 'error' => 'Tutti i campi sono obbligatori'];
+    }
+    if (!in_array($creator, $membri)) {
+        return ['success' => false, 'error' => 'Il creatore deve essere tra i membri'];
+    }
+    $placeholders = implode(',', array_fill(0, count($membri), '?'));
+    $types = str_repeat('s', count($membri));
+    $sql = "SELECT pla_username FROM players WHERE pla_username IN ($placeholders) AND pla_cln_id IS NOT NULL";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$membri);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($res->num_rows > 0) {
+        $usernames = array_column($res->fetch_all(MYSQLI_ASSOC), 'pla_username');
+        return ['success' => false, 'error' => 'Alcuni membri fanno già parte di un altro clan: ' . implode(', ', $usernames)];
+    }
+    $stmt = $conn->prepare("INSERT INTO clans (cln_nome, cln_image, cln_creator) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $nome, $image, $creator);
+    if (!$stmt->execute()) {
+        return ['success' => false, 'error' => $stmt->error];
+    }
+    $clan_id = $conn->insert_id;
+    $stmt = $conn->prepare("UPDATE players SET pla_cln_id = ? WHERE pla_username = ?");
+    if (!$stmt) {
+        return ['success' => false, 'error' => 'Errore prepare update membri: ' . $conn->error];
+    }
+    foreach ($membri as $username) {
+        $stmt->bind_param("is", $clan_id, $username);
+        if (!$stmt->execute()) {
+            return ['success' => false, 'error' => 'Errore aggiunta membro: ' . $username . ' - ' . $stmt->error];
+        }
+    }
+    return ['success' => true, 'clan_id' => $clan_id];
 }

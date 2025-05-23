@@ -24,7 +24,7 @@
           <div class="team-list">
             <div v-for="p in teamWin" :key="p.username" class="partecipante-card">
               <div class="partecipante-hero-img">
-                <img v-if="p.eroe_img" :src="p.eroe_img" :alt="p.eroe" />
+                <img v-if="p.eroe_img" :src="getHeroImgSrc(p.eroe_img)" :alt="p.eroe" />
                 <div v-else class="img-placeholder">{{ p.eroe?.charAt(0) }}</div>
               </div>
               <div class="partecipante-info">
@@ -45,7 +45,7 @@
           <div class="team-list">
             <div v-for="p in teamLose" :key="p.username" class="partecipante-card">
               <div class="partecipante-hero-img">
-                <img v-if="p.eroe_img" :src="p.eroe_img" :alt="p.eroe" />
+                <img v-if="p.eroe_img" :src="getHeroImgSrc(p.eroe_img)" :alt="p.eroe" />
                 <div v-else class="img-placeholder">{{ p.eroe?.charAt(0) }}</div>
               </div>
               <div class="partecipante-info">
@@ -87,6 +87,12 @@ function formatDate(dateStr) {
   return d.toLocaleString()
 }
 
+function getHeroImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/heroes/')) return img
+  return `/images/heroes/${img}`
+}
+
 async function fetchPartita() {
   fetchError.value = false
   loading.value = true
@@ -121,6 +127,9 @@ onMounted(() => {
   background: #071b13;
   min-height: 100vh;
   padding-top: 80px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 h1 {
   font-size: 2.5rem;

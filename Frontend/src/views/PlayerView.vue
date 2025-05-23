@@ -14,7 +14,7 @@
       <button class="admin-btn">Modifica Partita</button>
       <button class="admin-btn">Elimina Partita</button>
     </div>
-    <h1>{{ username }} 
+    <h1>{{ username }}
       <router-link v-if="clanName" :to="`/clan/${clanName}`">
         <span>({{ clanName }})</span>
       </router-link>
@@ -27,7 +27,7 @@
         <!-- Colonna sinistra -->
         <div class="player-sidebar">
           <div class="rank-btn">
-            <img v-if="player.rank_img" :src="player.rank_img" class="rank-img" />
+            <img v-if="player.rank_img" :src="getRankImgSrc(player.rank_img)" class="rank-img" />
             <span v-else>{{ player.rank || 'Rank' }}</span>
           </div>
           <div class="eroi-giocati">
@@ -35,7 +35,7 @@
             <div v-for="eroe in player.eroiGiocati" :key="eroe.ero_id" class="eroe-giocato-card">
               <router-link :to="`/eroe/${eroe.nome || eroe.name || 'Eroe'}`">
                 <template v-if="eroe.img">
-                  <img :src="eroe.img" :alt="eroe.nome || eroe.name || 'Eroe'" class="eroe-img-sidebar" />
+                  <img :src="getHeroImgSrc(eroe.img)" :alt="eroe.nome || eroe.name || 'Eroe'" class="eroe-img-sidebar" />
                 </template>
                 <span>{{ eroe.nome || eroe.name || 'Eroe' }}</span>
               </router-link>
@@ -58,7 +58,7 @@
               <div class="match-card-opgg" :class="{ win: match.risultato === 'Vinto', lose: match.risultato === 'Perso' }">
                 <!-- Immagine eroe giocato -->
                 <div class="match-hero-img">
-                  <img v-if="match.eroe_img" :src="match.eroe_img" :alt="match.eroe" />
+                  <img v-if="match.eroe_img" :src="getHeroImgSrc(match.eroe_img)" :alt="match.eroe" />
                   <div v-else class="img-placeholder">{{ match.eroe?.charAt(0) }}</div>
                 </div>
                 <!-- Centro: risultato, KDA, dettagli -->
@@ -205,6 +205,18 @@ watch(player, (newVal) => {
     getClanName()
   }
 })
+
+function getRankImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/ranks/')) return img
+  return `/images/ranks/${img}`
+}
+
+function getHeroImgSrc(img) {
+  if (!img) return ''
+  if (img.startsWith('/images/heroes/')) return img
+  return `/images/heroes/${img}`
+}
 </script>
 
 <style scoped>
@@ -214,6 +226,9 @@ watch(player, (newVal) => {
   background: #071b13;
   min-height: 100vh;
   padding-top: 80px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 h1 {
   font-size: 2.5rem;

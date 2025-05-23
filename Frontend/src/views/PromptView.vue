@@ -71,6 +71,9 @@ const sendPrompt = async () => {
   background: #000000;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow-x: hidden;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 
 .chat-messages {
