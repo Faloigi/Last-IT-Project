@@ -1,5 +1,10 @@
 <template>
   <div class="clan-container" v-if="loading === false">
+    <div v-if="isAdmin" class="admin-buttons">
+      <button class="admin-btn">Crea Clan</button>
+      <button class="admin-btn">Modifica Clan</button>
+      <button class="admin-btn">Elimina Clan</button>
+    </div>
     <h1>{{ clan?.nome || nome }}</h1>
     <div v-if="fetchError" class="error-message">
       Clan non trovato o errore di rete.
@@ -65,6 +70,7 @@ const nome = route.params.nome
 const clan = ref(null)
 const fetchError = ref(false)
 const loading = ref(true)
+const isAdmin = ref(false)
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -89,6 +95,13 @@ async function fetchClan() {
 
 onMounted(() => {
   fetchClan()
+  const user = localStorage.getItem('user')
+  if (user) {
+    try {
+      const parsed = JSON.parse(user)
+      isAdmin.value = parsed.ute_ruolo === 'admin'
+    } catch {}
+  }
 })
 </script>
 
@@ -281,5 +294,26 @@ h1 {
   text-align: center;
   font-size: 1.3rem;
   margin-top: 2rem;
+}
+.admin-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+.admin-btn {
+  background: #19d86b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-btn:hover {
+  background: #13b85a;
 }
 </style>

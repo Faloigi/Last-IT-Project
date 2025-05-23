@@ -235,7 +235,7 @@ async function fetchRanks() {
 }
 
 async function fetchClassi() {
-  const res = await fetch('http://localhost/BigBlackDeath/backend/Hero/getClassi.php')
+  const res = await fetch('http://localhost/BigBlackDeath/backend/Eroi/getClassi.php')
   const data = await res.json()
   classeOptions.value = [{ name: 'Tutte le classi', value: '' }, ...data.map(c => ({ name: c.cla_nome, value: c.cla_nome }))]
 }
@@ -256,7 +256,7 @@ async function fetchStatsHero() {
   if (mappa.value) params.append('mappa', mappa.value)
   if (rank.value) params.append('rank', rank.value)
   // NB: questi filtri sono placeholder, l'endpoint attuale non li supporta ancora
-  const res = await fetch(`http://localhost/BigBlackDeath/backend/Hero/getStatsEroe.php?${params.toString()}`)
+  const res = await fetch(`http://localhost/BigBlackDeath/backend/Eroi/getStatsEroe.php?${params.toString()}`)
   eroi.value = await res.json()
 }
 

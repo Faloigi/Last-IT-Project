@@ -32,7 +32,7 @@ function getStatsPlayer(){
 function getPlayerData($username){
     global $conn;
     // Dati base player
-    $query = "SELECT pla_id, pla_username, pla_livello, pla_mmr, pla_ran_id FROM players WHERE pla_username = ?";
+    $query = "SELECT pla_id, pla_username, pla_livello, pla_mmr, pla_ran_id, pla_cln_id FROM players WHERE pla_username = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -109,7 +109,8 @@ function getPlayerData($username){
         'kd' => $stats['kd'],
         'winrate' => $stats['winrate'],
         'danni' => $stats['danni'],
-        'partite_giocate' => $stats['partite_giocate']
+        'partite_giocate' => $stats['partite_giocate'],
+        'clan_id' => $player['pla_cln_id']
     ];
 }
 
@@ -128,6 +129,15 @@ function getStatsClan(){
               ORDER BY cln_punti DESC";
     $result = $conn->query($query);
     return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function getClanName($id){
+    global $conn;
+    $query = "SELECT cln_nome as nome FROM clans WHERE cln_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
 }
 
 function getFilteredStatsPlayer($modalita = null, $mappa = null, $rank = null) {
@@ -377,4 +387,52 @@ function getClanData($nome) {
     $matches = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $clan['matches'] = $matches;
     return $clan;
+}
+
+function createEroe($nome, $difficolta, $cla_id, $image) {
+    global $conn;
+    $query = "INSERT INTO eroi (ero_nome, ero_difficolta, ero_cla_id, ero_image) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("siis", $nome, $difficolta, $cla_id, $image);
+    if ($stmt->execute()) {
+        return ["success" => true, "id" => $conn->insert_id];
+    } else {
+        return ["success" => false, "error" => $stmt->error];
+    }
+}
+
+function updateEroe($id, $nome, $difficolta, $cla_id, $image) {
+    global $conn;
+    $query = "UPDATE eroi SET ero_nome = ?, ero_difficolta = ?, ero_cla_id = ?, ero_image = ? WHERE ero_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("siisi", $nome, $difficolta, $cla_id, $image, $id);
+    if ($stmt->execute()) {
+        return ["success" => true];
+    } else {
+        return ["success" => false, "error" => $stmt->error];
+    }
+}
+
+function deleteEroe($id) {
+    global $conn;
+    $query = "DELETE FROM eroi WHERE ero_id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    if ($stmt->execute()) {
+        return ["success" => true];
+    } else {
+        return ["success" => false, "error" => $stmt->error];
+    }
+}
+
+function updateEroeByName($nome_originale, $nome_nuovo, $difficolta, $cla_id, $image) {
+    global $conn;
+    $query = "UPDATE eroi SET ero_nome = ?, ero_difficolta = ?, ero_cla_id = ?, ero_image = ? WHERE ero_nome = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("sisss", $nome_nuovo, $difficolta, $cla_id, $image, $nome_originale);
+    if ($stmt->execute()) {
+        return ["success" => true];
+    } else {
+        return ["success" => false, "error" => $stmt->error];
+    }
 }

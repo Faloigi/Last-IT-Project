@@ -1,5 +1,10 @@
 <template>
   <div class="partita-container" v-if="loading === false">
+    <div v-if="isAdmin" class="admin-buttons">
+      <button class="admin-btn">Crea Partita</button>
+      <button class="admin-btn">Modifica Partita</button>
+      <button class="admin-btn">Elimina Partita</button>
+    </div>
     <h1>Partita #{{ partitaId }}</h1>
     <div v-if="fetchError" class="error-message">
       Partita non trovata o errore di rete.
@@ -71,6 +76,7 @@ const partitaId = route.params.id
 const partita = ref(null)
 const fetchError = ref(false)
 const loading = ref(true)
+const isAdmin = ref(false)
 
 const teamWin = computed(() => partita.value?.partecipanti?.filter(p => p.risultato === 'Vinto') || [])
 const teamLose = computed(() => partita.value?.partecipanti?.filter(p => p.risultato === 'Perso') || [])
@@ -98,6 +104,13 @@ async function fetchPartita() {
 
 onMounted(() => {
   fetchPartita()
+  const user = localStorage.getItem('user')
+  if (user) {
+    try {
+      const parsed = JSON.parse(user)
+      isAdmin.value = parsed.ute_ruolo === 'admin'
+    } catch {}
+  }
 })
 </script>
 
@@ -277,5 +290,26 @@ h1 {
   margin: 2rem auto;
   max-width: 600px;
   font-size: 1.3rem;
+}
+.admin-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+.admin-btn {
+  background: #19d86b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-btn:hover {
+  background: #13b85a;
 }
 </style>

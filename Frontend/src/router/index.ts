@@ -6,6 +6,9 @@ import PlayerView from '@/views/PlayerView.vue'
 import StatsView from '@/views/StatsView.vue'
 import PartitaView from '@/views/PartitaView.vue'
 import ClanView from '@/views/ClanView.vue'
+import EroeEditView from '@/views/EroeEditView.vue'
+import AdminCreaEroeView from '@/views/ADMIN/CreaEroeView.vue'
+import AdminEroeEditView from '@/views/ADMIN/EroeEditView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -51,7 +54,36 @@ const router = createRouter({
       name: 'clan',
       component: ClanView
     },
+    {
+      path: '/eroi/modifica/:nome',
+      name: 'modifica-eroe',
+      component: EroeEditView
+    },
+    // ADMIN routes
+    {
+      path: '/admin/eroi/crea',
+      name: 'admin-crea-eroe',
+      component: AdminCreaEroeView,
+      meta: { requiresAdmin: true }
+    },
+    {
+      path: '/admin/eroi/modifica/:nome',
+      name: 'admin-modifica-eroe',
+      component: AdminEroeEditView,
+      meta: { requiresAdmin: true }
+    },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAdmin) {
+    const userRole = localStorage.getItem('userRole')
+    if (userRole !== 'admin') {
+      // Puoi mostrare un messaggio o reindirizzare dove vuoi
+      return next({ name: 'home' })
+    }
+  }
+  next()
 })
 
 export default router

@@ -1,5 +1,8 @@
 <template>
   <div class="eroi-container">
+    <div v-if="isAdmin" class="admin-buttons">
+      <button class="admin-btn">Crea Eroe</button>
+    </div>
     <h1>Eroi</h1>
     <div class="filters">
       <input v-model="search" placeholder="Cerca Player/Clan/Eroe..." />
@@ -7,14 +10,15 @@
       <Dropdown v-model="difficolta" :options="difficoltaOptionsDropdown" optionLabel="name" optionValue="value" placeholder="Tutte le difficoltà" class="p-dropdown-green" />
     </div>
     <div class="eroi-grid">
-      <router-link
+      <div
         v-for="eroe in filteredEroi"
         :key="eroe.id || eroe.ero_id"
-        :to="`/eroe/${eroe.eroe}`"
         class="eroe-card-link"
       >
         <div class="eroe-card">
-          <div class="eroe-card-header">{{ eroe.eroe }}</div>
+          <router-link :to="`/eroe/${eroe.eroe}`" class="eroe-card-header-link">
+            <div class="eroe-card-header">{{ eroe.eroe }}</div>
+          </router-link>
           <div class="eroe-card-img">
             <img v-if="eroe.img" :src="eroe.img" :alt="eroe.eroe" />
             <span v-else>Immagine</span>
@@ -25,8 +29,12 @@
             <div class="eroe-card-row"><b>Partite:</b> {{ eroe.partite_giocate || eroe.partite || '-' }}</div>
             <div class="eroe-card-row"><b>% Vittorie:</b> {{ eroe.vittorie ? eroe.vittorie + '%' : '-' }}</div>
           </div>
+          <div v-if="isAdmin" class="admin-buttons-card">
+            <button class="admin-btn-card" @click="$router.push(`/eroi/modifica/${encodeURIComponent(eroe.eroe)}`)">Modifica</button>
+            <button class="admin-btn-card">Elimina</button>
+          </div>
         </div>
-      </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +48,7 @@ const classe = ref('')
 const difficolta = ref('')
 
 const eroi = ref([])
+const isAdmin = ref(false)
 
 // Classi e difficoltà dinamiche dai dati
 const classiDisponibili = computed(() => {
@@ -59,8 +68,9 @@ const difficoltaOptionsDropdown = computed(() => [{ name: 'Tutte le difficoltà'
 // Fetch dati eroi da PHP
 const fetchEroi = async () => {
   try {
-    const res = await fetch('http://localhost/BigBlackDeath/backend/Hero/getStatsEroe.php')
-    eroi.value = await res.json()
+    const res = await fetch('http://localhost/BigBlackDeath/backend/Eroi/getStatsEroe.php')
+    const data = await res.json()
+    eroi.value = Array.isArray(data) ? data : []
   } catch (e) {
     eroi.value = []
   }
@@ -68,6 +78,13 @@ const fetchEroi = async () => {
 
 onMounted(() => {
   fetchEroi()
+  const user = localStorage.getItem('user')
+  if (user) {
+    try {
+      const parsed = JSON.parse(user)
+      isAdmin.value = parsed.ute_ruolo === 'admin'
+    } catch {}
+  }
 })
 
 // Filtri
@@ -118,9 +135,10 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 320px;
+  min-height: 400px;
   transition: transform 0.15s;
   cursor: pointer;
+  padding-bottom: 1.5rem;
 }
 .eroe-card:hover {
   transform: translateY(-8px) scale(1.03);
@@ -149,6 +167,8 @@ h1 {
   border-radius: 1.2rem;
   object-fit: contain;
   background: #0d2b1a;
+  display: block;
+  margin: 0 auto;
 }
 .eroe-card-img span {
   font-size: 2rem;
@@ -206,5 +226,50 @@ h1 {
 }
 .eroe-card-row {
   margin-bottom: 0.2rem;
+}
+.admin-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+.admin-btn {
+  background: #19d86b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-btn:hover {
+  background: #13b85a;
+}
+.admin-buttons-card {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-top: 1.2rem;
+}
+.admin-btn-card {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-btn-card:first-child {
+  background: #f1c40f;
+  color: #222;
+}
+.admin-btn-card:hover {
+  filter: brightness(1.1);
 }
 </style>

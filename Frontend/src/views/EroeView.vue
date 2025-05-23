@@ -65,7 +65,7 @@ async function fetchEroe() {
   fetchErrore.value = false
   loading.value = true
   try {
-    const res = await fetch(`http://localhost/BigBlackDeath/backend/Hero/getEroe.php?nome=${encodeURIComponent(nome)}`)
+    const res = await fetch(`http://localhost/BigBlackDeath/backend/Eroi/getEroe.php?nome=${encodeURIComponent(nome)}`)
     if (!res.ok) throw new Error('Errore fetch')
     eroe.value = await res.json()
     loading.value = false
@@ -122,6 +122,8 @@ h1 {
   height: 100%;
   object-fit: contain;
   border-radius: 1.5rem;
+  display: block;
+  margin: 0 auto;
 }
 .img-placeholder {
   font-size: 2rem;

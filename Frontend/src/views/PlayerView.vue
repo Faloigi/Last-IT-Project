@@ -1,6 +1,24 @@
 <template>
   <div class="player-container">
-    <h1>{{ username }}</h1>
+    <div v-if="isAdmin" class="admin-buttons">
+      <button class="admin-btn">Crea Eroe</button>
+      <button class="admin-btn">Modifica Eroe</button>
+      <button class="admin-btn">Elimina Eroe</button>
+      <button class="admin-btn">Crea Player</button>
+      <button class="admin-btn">Modifica Player</button>
+      <button class="admin-btn">Elimina Player</button>
+      <button class="admin-btn">Crea Clan</button>
+      <button class="admin-btn">Modifica Clan</button>
+      <button class="admin-btn">Elimina Clan</button>
+      <button class="admin-btn">Crea Partita</button>
+      <button class="admin-btn">Modifica Partita</button>
+      <button class="admin-btn">Elimina Partita</button>
+    </div>
+    <h1>{{ username }} 
+      <router-link v-if="clanName" :to="`/clan/${clanName}`">
+        <span>({{ clanName }})</span>
+      </router-link>
+      </h1>
     <div v-if="fetchError" class="error-message">
       Player non trovato o errore di rete.
     </div>
@@ -16,6 +34,9 @@
             <div class="sidebar-title">Eroi Giocati</div>
             <div v-for="eroe in player.eroiGiocati" :key="eroe.ero_id" class="eroe-giocato-card">
               <router-link :to="`/eroe/${eroe.nome || eroe.name || 'Eroe'}`">
+                <template v-if="eroe.img">
+                  <img :src="eroe.img" :alt="eroe.nome || eroe.name || 'Eroe'" class="eroe-img-sidebar" />
+                </template>
                 <span>{{ eroe.nome || eroe.name || 'Eroe' }}</span>
               </router-link>
             </div>
@@ -76,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Dropdown from 'primevue/dropdown'
 
@@ -88,6 +109,8 @@ const username = computed(() => route.params.username || '')
 const searchHero = ref('')
 const modalita = ref('')
 const mappa = ref('')
+const clanName = ref("")
+const isAdmin = ref(false)
 
 // Personalizza il messaggio "No available options"
 const emptyMessageTemplate = (options) => {
@@ -114,6 +137,17 @@ async function getPlayerData() {
   }
 }
 
+async function getClanName(){
+  fetchError.value = false
+  try{
+    if (!player.value || !player.value.clan_id) return;
+    const res = await fetch('http://localhost/BigBlackDeath/backend/Clan/getClanName.php?id=' + player.value.clan_id)
+    const data = await res.json()
+    clanName.value = data?.nome || ''
+  } catch (e) {
+    clanName.value = ''
+  }
+}
 // Popola dinamicamente le modalità e le mappe disponibili
 const modalitaDisponibili = computed(() => {
   const set = new Set()
@@ -157,6 +191,19 @@ const filteredMatches = computed(() => {
 
 onMounted(() => {
   getPlayerData()
+  const user = localStorage.getItem('user')
+  if (user) {
+    try {
+      const parsed = JSON.parse(user)
+      isAdmin.value = parsed.ute_ruolo === 'admin'
+    } catch {}
+  }
+})
+
+watch(player, (newVal) => {
+  if (newVal && newVal.clan_id) {
+    getClanName()
+  }
 })
 </script>
 
@@ -443,5 +490,36 @@ h1 {
 }
 .match-card-link:hover {
   filter: brightness(1.15) drop-shadow(0 0 8px #19d86b88);
+}
+
+.eroe-img-sidebar {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.admin-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+.admin-btn {
+  background: #19d86b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-btn:hover {
+  background: #13b85a;
 }
 </style>
